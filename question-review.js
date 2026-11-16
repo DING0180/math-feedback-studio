@@ -4,6 +4,7 @@ let qrGroup = null;
 let qrExamId = '';
 let qrQuestionId = '';
 let qrStudentIndex = 0;
+let qrImageRequest = 0;
 const qrImageUrls = new Set();
 
 function qrCrops(person, questionId) {
@@ -78,8 +79,52 @@ function qrView() {
 }
 
 function qrReleaseImages() {
+  qrImageRequest++;
   for (const url of qrImageUrls) URL.revokeObjectURL(url);
   qrImageUrls.clear();
+}
+
+function qrSwapImages(holder, crops, studentName, questionId, emptyHint) {
+  const request = ++qrImageRequest;
+  const next = document.createElement('div');
+  const nextUrls = [];
+  next.innerHTML = crops.length ? crops.map((crop, index) => {
+    const url = URL.createObjectURL(crop.blob);
+    qrImageUrls.add(url);
+    nextUrls.push(url);
+    const caption = crops.length > 1 ? `<figcaption>切片 ${index + 1} / ${crops.length}</figcaption>` : '';
+    return `<figure><img src="${E(url)}" alt="${E(`${studentName} ${questionId} 作答切片 ${index + 1}`)}">${caption}</figure>`;
+  }).join('') : `<div class="empty qr-empty">${E(emptyHint)}</div>`;
+
+  const discard = url => { if (qrImageUrls.delete(url)) URL.revokeObjectURL(url); };
+  const commit = () => {
+    if (request !== qrImageRequest || !holder.isConnected) {
+      nextUrls.forEach(discard);
+      return;
+    }
+    const {scrollLeft, scrollTop} = holder;
+    holder.querySelectorAll('img').forEach(image => discard(image.src));
+    holder.replaceChildren(...next.childNodes);
+    holder.scrollTo(scrollLeft, scrollTop);
+    holder.removeAttribute('aria-busy');
+  };
+  if (!crops.length) {
+    commit();
+    return;
+  }
+  holder.setAttribute('aria-busy', 'true');
+  const images = [...next.querySelectorAll('img')];
+  Promise.allSettled(images.map(image => image.decode())).then(results => {
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') return;
+      discard(nextUrls[index]);
+      const message = document.createElement('p');
+      message.className = 'qr-empty';
+      message.textContent = '这张切片无法打开。';
+      images[index].replaceWith(message);
+    });
+    commit();
+  });
 }
 
 function qrShowStudent(selection) {
@@ -96,20 +141,9 @@ function qrShowStudent(selection) {
   $('.qr-meta').innerHTML = `<p><strong>得分</strong> ${E(mark)}</p>${note ? `<p class="qr-note"><strong>教师备注</strong> ${E(note)}</p>` : ''}${person?.cropsStale ? '<p class="qr-note">答题卡已更新，此切片待复核。</p>' : ''}`;
 
   const holder = $('.qr-images');
-  qrReleaseImages();
-  holder.scrollTop = 0;
   const crops = qrCrops(person, id);
-  if (!crops.length) {
-    const hint = !person ? '该生尚未关联这场考试。' : person.cards?.length ? '该生有原卷，本题暂无切片。' : '该生尚未导入答题卡。';
-    holder.innerHTML = `<div class="empty qr-empty">${hint}</div>`;
-    return;
-  }
-  holder.innerHTML = crops.map((crop, index) => {
-    const url = URL.createObjectURL(crop.blob);
-    qrImageUrls.add(url);
-    const caption = crops.length > 1 ? `<figcaption>切片 ${index + 1} / ${crops.length}</figcaption>` : '';
-    return `<figure><img src="${E(url)}" alt="${E(`${student.name} ${id} 作答切片 ${index + 1}`)}">${caption}</figure>`;
-  }).join('');
+  const hint = !person ? '该生尚未关联这场考试。' : person.cards?.length ? '该生有原卷，本题暂无切片。' : '该生尚未导入答题卡。';
+  qrSwapImages(holder, crops, student.name, id, hint);
 }
 
 function qrSetStudent(index, selection) {

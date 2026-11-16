@@ -69,9 +69,12 @@
 }
 
 .qr-filters select, .qr-filters label { width: 100%; min-width: 0; }
-.qr-stage { min-width: 0; }
+.qr-stage { min-width: 0; overflow-anchor: none; }
 
 .qr-review-bar {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
   padding: 12px;
   background: var(--brand-soft);
   border: 1px solid var(--brand-line);
@@ -85,9 +88,10 @@
 .qr-meta { margin: 12px 0; overflow-wrap: anywhere; }
 
 .qr-images {
-  max-height: min(65vh, 780px);
+  height: min(65vh, 780px);
   overflow: auto;
   display: grid;
+  align-content: start;
   gap: 12px;
   padding: 12px;
   background: var(--workspace);
@@ -96,6 +100,7 @@
 }
 
 .qr-images figure { margin: 0; min-width: 0; }
+.qr-images[aria-busy="true"] figure { visibility: hidden; }
 .qr-images img { display: block; max-width: 100%; height: auto; margin: 0 auto; background: white; }
 .qr-images figcaption { text-align: center; color: var(--muted); margin-top: 6px; font-size: 12px; }
 .qr-empty { margin-top: 12px; padding: 22px; color: var(--muted); background: var(--workspace); border-radius: 10px; }
