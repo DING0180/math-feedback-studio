@@ -1,0 +1,107 @@
+.u-card-dialog {
+  width: min(1180px, 100%);
+}
+
+.u-card-controls, .qr-review-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.u-card-controls { margin-bottom: 12px; }
+.u-card-summary { margin: 0 0 12px; }
+
+.u-card-viewer {
+  max-height: min(65vh, 800px);
+  overflow: auto;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  background: var(--workspace);
+}
+
+.u-card-viewer .u-card-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  background: white;
+}
+
+.u-card-viewer .u-card-image--native {
+  max-width: none;
+  margin: 0;
+}
+
+.qr-mode-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 5px;
+  margin-bottom: 18px;
+  background: var(--brand-soft);
+  border: 1px solid var(--edge);
+  border-radius: 11px;
+}
+
+.qr-mode-tabs button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--brand-ink);
+}
+
+.qr-mode-tabs button.active {
+  background: var(--paper);
+  border-color: var(--brand-line);
+  font-weight: 700;
+}
+
+.qr-heading { margin-bottom: 16px; }
+.qr-heading h2 { margin-bottom: 5px; }
+
+.qr-filters {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(190px, 2fr) minmax(120px, 1fr);
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.qr-filters select, .qr-filters label { width: 100%; min-width: 0; }
+.qr-stage { min-width: 0; }
+
+.qr-review-bar {
+  padding: 12px;
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-line);
+  border-radius: 10px;
+}
+
+.qr-review-bar label { flex: 1 1 190px; min-width: 0; }
+.qr-review-bar select { width: 100%; min-width: 0; }
+.qr-review-bar button { min-height: 36px; }
+.qr-counter { color: var(--brand-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.qr-meta { margin: 12px 0; overflow-wrap: anywhere; }
+
+.qr-images {
+  max-height: min(65vh, 780px);
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  background: var(--workspace);
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+}
+
+.qr-images figure { margin: 0; min-width: 0; }
+.qr-images img { display: block; max-width: 100%; height: auto; margin: 0 auto; background: white; }
+.qr-images figcaption { text-align: center; color: var(--muted); margin-top: 6px; font-size: 12px; }
+.qr-empty { margin-top: 12px; padding: 22px; color: var(--muted); background: var(--workspace); border-radius: 10px; }
+
+@media (max-width: 650px) {
+  .qr-filters { grid-template-columns: 1fr; }
+  .qr-images { padding: 6px; }
+  .u-card-dialog { padding: 16px; }
+}
