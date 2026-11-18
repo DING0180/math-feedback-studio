@@ -24,7 +24,7 @@ function pfDraftControls(record) {
   return `<div class="pf-exam-controls">
     ${current?`<label class="field">本次考试<select id="pf-draft-exam-select">${options.map(({id,label})=>`<option value="${E(id)}" ${id===current.id?'selected':''}>${E(label)}</option>`).join('')}</select></label>
       <button type="button" class="smallbtn" data-pf-open-exam>查看该生逐题档案</button>`:''}
-    <p class="hint" id="pf-exam-evidence">${current?'自动读取与该生档案关联的成绩和逐题记录；切片中的具体错因采用教师批注。':'当前没有已匹配的成绩记录，也可先填写考试观察。'}</p>
+    <p class="hint" id="pf-exam-evidence">${current?'评语根据题型表现、知识点和教师观察生成。可打开答题卡切片复核。':'可先填写你在答卷上看到的具体表现。'}</p>
   </div>`;
 }
 function pfDraftActions() {
@@ -39,10 +39,10 @@ function pfDraftGenerate(record, part, examId, style) {
   if (part==='daily') return {text:pfWriteDaily(record,style)};
   if (part==='action') return {text:pfWriteActions(record,style)};
   const evidence = examId ? pfExamFeedback(record,examId,style) : null;
-  const note = record.examNote?.trim();
-  const manual = note && /[。！？!?]$/.test(note) ? note : note ? note+'。' : '';
+  const note = pfExamQualitativeNotes(record.examNote).join('。');
+  const manual = note ? note+'。' : '';
   let extra = manual;
-  if (!evidence?.text && extra && record.name && !extra.includes(record.name)) extra = `${record.name}这次考试需要留意的是：${extra}`;
+  if (!evidence?.text && extra && record.name && !extra.includes(record.name)) extra = `复看${record.name}的答卷时发现，${extra}`;
   return {...evidence, text:[evidence?.text,extra].filter(Boolean).join('')};
 }
 function pfDraftBind() {
@@ -59,7 +59,7 @@ function pfDraftBind() {
     pfSave();
     $('#pf-exam-evidence').textContent = record.draft?.exam?.trim()
       ? '已切换考试。现有评语仍保留；如需更新，请重新生成考试分析。'
-      : '点击生成考试分析，读取本次考试和可比的历史成绩。';
+      : '点击生成考试分析，查看本次考试的题型和知识点表现。';
   };
   const openExam = document.querySelector('[data-pf-open-exam]');
   if (openExam) openExam.onclick = () => {
