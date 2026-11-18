@@ -25,7 +25,26 @@ async function ssCrop(){let e=ssExam();if(!e.regions.length)return;if(e.students
 function ssViewCrop(q){let s=ssPerson(),meta=ssExam().questions.find(x=>x.id===q),v=s.scores[q],arr=s.crops[q]||[];if(!arr.length)return alert('这道题还没有切图。请先框选区域并执行批量切图。');let urls=arr.map(x=>URL.createObjectURL(x.blob));modal(s.name+' · '+q,`<p class="hint">得分：${v?.value??v?.status??'未录入'} / ${meta?.max??'未设满分'}${s.cropsStale?' · 切图可能已过期':''}</p>${meta?.prompt?`<div class="summary"><b>题目要点：</b>${ssEsc(meta.prompt)}</div>`:''}${meta?.answer?`<div class="summary"><b>参考答案：</b>${ssEsc(meta.answer)}</div>`:''}`+arr.map((x,i)=>`<p class="hint">第 ${x.page} 页 · 切图 ${i+1}</p><img class="ss-crop" src="${urls[i]}">`).join(''));}
 function ssMax(){let e=ssExam();modal('设置各题满分',`<p class="hint">用于判断是否失分；成绩表中的得分不会被修改。</p>${e.questions.map((q,i)=>`<label class="row" style="margin:8px 0"><span class="grow">${ssEsc(q.id)}</span><input type="number" min="0.01" step="any" style="width:120px" data-ss-max="${i}" value="${q.max??''}"></label>`).join('')}`,'保存',async d=>{let inputs=[...d.querySelectorAll('[data-ss-max]')];for(let x of inputs){let val=x.value===''?null:+x.value;if(val!==null&&(!Number.isFinite(val)||val<=0))return alert('满分必须大于 0。');let q=e.questions[+x.dataset.ssMax];if(val!==null&&e.students.some(s=>s.scores[q.id]?.value>val))return alert(q.id+' 有学生得分大于所填满分，请核对。')}inputs.forEach(x=>e.questions[+x.dataset.ssMax].max=x.value===''?null:+x.value);await ssSave(e);d.remove();render()})}
 function ssManageCards(){let s=ssPerson(),e=ssExam();if(!s.cards.length)return alert('这位学生还没有答题卡。');modal('管理答题卡',`<p class="hint">请核对文件顺序。移除文件后，旧切图会保留但标记为过期，需重新切图。</p>${s.cards.map((c,i)=>`<div class="row" style="margin:10px 0"><span class="grow">${ssEsc(c.name)} · ${c.count} 页</span><button class="smallbtn danger" data-ss-remove-card="${i}">移除</button></div>`).join('')}`);let d=document.querySelector('.modalback:last-child');d.querySelectorAll('[data-ss-remove-card]').forEach(x=>x.onclick=async()=>{if(!confirm('确认移除该答题卡文件？建议先备份逐题档案。'))return;s.cards.splice(+x.dataset.ssRemoveCard,1);if(Object.values(s.crops).some(a=>a.length))s.cropsStale=true;await ssSave(e);d.remove();render()})}
-function ssToFeedback(){let e=ssExam(),s=ssPerson();if(!s.studentId)return alert('该学生没有学号，无法安全自动关联。请到学校模板反馈中手动填写。');let targets=pf.records.filter(r=>r.id===s.studentId&&r.name===s.name);if(targets.length!==1)return alert('未能在学校模板中找到学号与姓名完全一致的学生。请先导入学校模板并核对姓名。');let items=e.questions.map(q=>{let v=s.scores[q.id];if(v?.status!=='有分数')return null;let result=q.max===null?'满分未设置':v.value<q.max?'有失分':'满分';let note=s.notes[q.id]?`；教师备注：${s.notes[q.id]}`:'';return `${q.id}：${v.value}/${q.max??'未设满分'}（${result}）${note}`}).filter(Boolean);if(!items.length)return alert('没有可写入的逐题分数。');let text=`【${e.name} 逐题成绩与教师备注】\n`+items.join('；');let target=targets[0];if(target.examNote?.includes(text))return ssMsg('这份逐题摘要已添加');target.examNote=[target.examNote,text].filter(Boolean).join('\n\n');if(pfSave())ssMsg('已追加到学校模板反馈的考试反馈；请核对后导出')}
+function ssToFeedback() {
+  const e = ssExam(), s = ssPerson();
+  if (!e || !s) return alert('请先选择考试和学生。');
+  const target = pfScoreTarget(e, s);
+  if (!target) return alert('未找到唯一对应的反馈档案。请到学生档案核对该生与这场考试的关联，或在反馈中手动填写。');
+
+  const items = e.questions.map(q => {
+    const v = s.scores[q.id];
+    if (v?.status !== '有分数') return null;
+    const result = q.max === null ? '满分未设置' : v.value < q.max ? '有失分' : '满分';
+    const note = s.notes[q.id] ? `；教师备注：${s.notes[q.id]}` : '';
+    return `${q.id}：${v.value}/${q.max ?? '未设满分'}（${result}）${note}`;
+  }).filter(Boolean);
+  if (!items.length) return alert('没有可写入的逐题分数。');
+
+  const text = `【${e.name} 逐题成绩与教师备注】\n` + items.join('；');
+  if (target.examNote?.includes(text)) return ssMsg('这份逐题摘要已添加');
+  target.examNote = [target.examNote, text].filter(Boolean).join('\n\n');
+  if (pfSave()) ssMsg('已追加到学校模板反馈的考试反馈；请核对后导出');
+}
 function ssQuestion(qid){let e=ssExam(),q=e.questions.find(x=>x.id===qid);modal(qid+' · 题目与参考答案',`<p class="hint">由老师填写的题目要点和答案供全班共用，原始试卷与答案文件仍可在上方查看。</p><label class="field">题目要点<textarea id="ss-q-prompt">${ssEsc(q.prompt||'')}</textarea></label><label class="field">参考答案<textarea id="ss-q-answer">${ssEsc(q.answer||'')}</textarea></label>`,'保存',async d=>{q.prompt=d.querySelector('#ss-q-prompt').value.trim();q.answer=d.querySelector('#ss-q-answer').value.trim();await ssSave(e);d.remove();render()})}
 function ssNotes(q){let e=ssExam(),s=ssPerson();modal(s.name+' · '+q+' 备注',`<p class="hint">记录您核对原图后的判断，系统不会自动推断错因。</p><textarea id="ss-note">${ssEsc(s.notes[q]||'')}</textarea>`,'保存',async d=>{s.notes[q]=d.querySelector('#ss-note').value.trim();await ssSave(e);d.remove();render()})}
 async function ssRefs(files){let e=ssExam();for(let f of files){if(!/\.(pdf|png|jpe?g|webp)$/i.test(f.name)){alert('不支持的文件：'+f.name);continue}e.refs.push({name:f.name,type:f.type,blob:f})}await ssSave(e);ssMsg('试卷 / 答案已保存')}
