@@ -22,7 +22,7 @@ function qrGroupLabel(group) {
 
 function qrSelection() {
   const groups = new Map();
-  for (const student of db.students) {
+  for (const student of activeStudentRoster()) {
     const group = student.group || '';
     if (!groups.has(group)) groups.set(group, []);
     groups.get(group).push(student);

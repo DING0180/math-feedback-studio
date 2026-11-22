@@ -220,9 +220,10 @@ function pfSave() {
 function pfActive() { return pf.classes[pf.group]; }
 
 function pfRecords(workspace = pfActive(), group = pf.group) {
-  if (!workspace.template && PF_GROUPS.includes(group)) {
-    const existing = new Set(workspace.records.map(record => record.profileId));
-    for (const student of db.students.filter(student => student.group === group)) {
+  if (PF_GROUPS.includes(group)) {
+    const roster = db.students.filter(student => student.group === group);
+    const existing = new Set(workspace.records.map(record => profileForRosterRow(record, roster)?.id));
+    for (const student of activeStudentRoster(group)) {
       if (existing.has(student.id)) continue;
       workspace.records.push(pfPrepare({
         key:'profile:' + student.id, profileId:student.id, row:null, id:student.id,
@@ -233,9 +234,14 @@ function pfRecords(workspace = pfActive(), group = pf.group) {
   return workspace.records;
 }
 
+function pfVisibleRecords(workspace = pfActive(), group = pf.group) {
+  const roster = db.students.filter(student => student.group === group || group === 'legacy');
+  return pfRecords(workspace, group).filter(record => profileForRosterRow(record, roster)?.archived !== true);
+}
+
 function pfStudent() {
   const workspace = pfActive();
-  const records = pfRecords(workspace);
+  const records = pfVisibleRecords(workspace);
   const student = records.find(record => record.key === workspace.selected) || records[0];
   workspace.selected = student?.key || '';
   return student;
@@ -251,14 +257,14 @@ function pfSwitch(group) {
 }
 
 function pfScoreTarget(exam, person) {
-  const exact = Object.values(pf.classes).flatMap(workspace => workspace.records)
+  const exact = Object.entries(pf.classes).flatMap(([group, workspace]) => pfVisibleRecords(workspace, group))
     .filter(record => person.studentId && record.id === person.studentId && record.name === person.name);
   if (exact.length === 1) return exact[0];
   if (exact.length > 1) return null;
-  const profiles = db.students.filter(profile => PF_GROUPS.includes(profile.group) && uResolve(profile, exam).person === person);
+  const profiles = activeStudentRoster().filter(profile => PF_GROUPS.includes(profile.group) && uResolve(profile, exam).person === person);
   if (profiles.length !== 1) return null;
   const profile = profiles[0];
-  const candidates = pfRecords(pf.classes[profile.group], profile.group)
+  const candidates = pfVisibleRecords(pf.classes[profile.group], profile.group)
     .filter(record => record.profileId === profile.id || (!record.profileId && record.name === profile.name));
   return candidates.length === 1 ? candidates[0] : null;
 }
@@ -355,7 +361,7 @@ function pfClassOptions() {
     `<option value="${E(group)}"${pf.group === group ? ' selected' : ''}>${E(group === 'legacy' ? '原模板' : group)}</option>`
   ).join('');
 }
-function pfView(){const workspace=pfActive(),records=pfRecords(workspace),template=workspace.template;let r=pfStudent(),list=records.filter(x=>`${x.name} ${x.id} ${x.cls}`.toLowerCase().includes(pfSearch.toLowerCase()));return `<div class="panel pf-top"><div class="panel-head"><div><h2>学校模板 · 反馈要点工作区</h2><p class="muted">选择标签、补充备注，生成三段评语或导出素材。</p></div><div class="toolbar"><label class="field">教学班<select id="pf-group">${pfClassOptions()}</select></label><button data-pf-action="import">${template?'更换本班模板':'导入本班模板'}</button><button class="primary" data-pf-action="export" ${records.length?'':'disabled'}>导出本班 Codex 素材表</button><button data-pf-action="drafts" ${records.length?'':'disabled'}>导出本班评语</button>${template&&records.some(s=>s.row===null)?'<button data-pf-action="generic">导出全部素材</button><button data-pf-action="generic-drafts">导出全部评语</button>':''}</div></div><div class="hint">${template?`当前模板：${E(template.name)}`:'当前使用工作台名单。可填写反馈并导出通用素材，导入学校模板后可按原表格式导出。'}</div><div class="alert">素材表保留标签和备注；评语表导出已合并的草稿。请先预览核对，再上传学校平台。</div></div>${!r?'<div class="panel empty">本班暂无学生。可在学生档案添加学生，或导入本班学校模板。</div>':`<div class="layout pf-layout"><section class="panel"><div class="panel-head"><h2>学生名单 <span class="muted">${records.length}</span></h2></div><input id="pf-search" class="search" placeholder="搜索姓名、学号或班级" value="${E(pfSearch)}"><div class="student-list">${list.map(s=>`<div class="student ${s.key===r.key?'selected':''}" data-pf-select="${E(s.key)}"><div class="student-name"><span class="avatar">${E(s.name.slice(-1))}</span><div><b>${E(s.name)}</b><small>${E(s.id||'无学号')} · ${E(s.cls)}</small></div></div><span class="hint">${pfDraftText(s)?'有评语':pfChunk(s)?'已记录':''}</span></div>`).join('')||'<div class="empty">暂无匹配的学生</div>'}</div></section><section><div class="panel"><div class="panel-head"><div><h2>${E(r.name)} <span class="muted">${E(r.id||'无学号')}</span></h2><p class="muted">${E(r.cls)} · ${r.row===null?'工作台草稿':`学校原表第 ${r.row} 行`}</p></div><label class="field" style="width:145px">成绩（按平台要求填写）<input data-pf-field="grade" value="${E(r.grade)}" placeholder="留空亦可"></label></div>${pfDraftActions()}${r.originalFeedback?`<div class="summary"><b>原表已有反馈（导出时保留）</b><br>${E(r.originalFeedback)}</div>`:''}${pfSection(r,'daily','第一部分 · 平常表现','选择真实观察，或补充这名学生的具体情况。')}<div class="feedback-card"><div class="panel-head"><div><h3>第二部分 · 考试分析</h3><p class="muted">用本次成绩和历次记录生成分析，也可补充自己的看卷观察。</p></div><button class="smallbtn" data-pf-voice="examNote">🎙 语音输入</button></div>${pfDraftControls(r)}<textarea aria-label="考试观察备注" data-pf-field="examNote" id="pf-examNote" placeholder="考试结束后记录错题、优势或分析要点。">${E(r.examNote)}</textarea>${pfDraftPart(r,'exam')}</div>${pfSection(r,'action','第三部分 · 有效措施','选择适合的措施，必要时录入个性化安排。')}<div class="feedback-card"><div class="panel-head"><div><h3>给 Codex 的个性化备注</h3><p class="muted">例如需要强调的特点、措辞偏好或希望避免的表达。</p></div><button class="smallbtn" data-pf-voice="instruction">🎙 语音输入</button></div><textarea data-pf-field="instruction" id="pf-instruction" placeholder="可留空；会与该生反馈要点一起导出。">${E(r.instruction)}</textarea></div><div class="feedback-card"><h3>全班统一语言风格</h3><p class="hint">作为写作要求随素材导出，您还可以在发给 Codex 时调整。</p><input id="pf-style" value="${E(workspace.style)}" placeholder="例如：亲切自然、具体客观"></div><div class="panel-head"><h3>Codex 素材预览</h3><span class="hint">${template&&r.row!==null?'保存在原表“反馈”列':'随通用素材导出'}</span></div><div class="summary" id="pf-preview">${E(pfContent(r)||'选择标签或输入备注后，在此显示素材。')}</div></div></section></div>`}`}
+function pfView(){const workspace=pfActive(),records=pfVisibleRecords(workspace),template=workspace.template;let r=pfStudent(),list=records.filter(x=>`${x.name} ${x.id} ${x.cls}`.toLowerCase().includes(pfSearch.toLowerCase()));return `<div class="panel pf-top"><div class="panel-head"><div><h2>学校模板 · 反馈要点工作区</h2><p class="muted">选择标签、补充备注，生成三段评语或导出素材。</p></div><div class="toolbar"><label class="field">教学班<select id="pf-group">${pfClassOptions()}</select></label><button data-pf-action="import">${template?'更换本班模板':'导入本班模板'}</button><button class="primary" data-pf-action="export" ${records.length?'':'disabled'}>导出本班 Codex 素材表</button><button data-pf-action="drafts" ${records.length?'':'disabled'}>导出本班评语</button>${template&&records.some(s=>s.row===null)?'<button data-pf-action="generic">导出全部素材</button><button data-pf-action="generic-drafts">导出全部评语</button>':''}</div></div><div class="hint">${template?`当前模板：${E(template.name)}`:'当前使用工作台名单。可填写反馈并导出通用素材，导入学校模板后可按原表格式导出。'}</div><div class="alert">素材表保留标签和备注；评语表导出已合并的草稿。请先预览核对，再上传学校平台。</div></div>${!r?'<div class="panel empty">本班暂无学生。可在学生档案添加学生，或导入本班学校模板。</div>':`<div class="layout pf-layout"><section class="panel"><div class="panel-head"><h2>学生名单 <span class="muted">${records.length}</span></h2></div><input id="pf-search" class="search" placeholder="搜索姓名、学号或班级" value="${E(pfSearch)}"><div class="student-list">${list.map(s=>`<div class="student ${s.key===r.key?'selected':''}" data-pf-select="${E(s.key)}"><div class="student-name"><span class="avatar">${E(s.name.slice(-1))}</span><div><b>${E(s.name)}</b><small>${E(s.id||'无学号')} · ${E(s.cls)}</small></div></div><span class="hint">${pfDraftText(s)?'有评语':pfChunk(s)?'已记录':''}</span></div>`).join('')||'<div class="empty">暂无匹配的学生</div>'}</div></section><section><div class="panel"><div class="panel-head"><div><h2>${E(r.name)} <span class="muted">${E(r.id||'无学号')}</span></h2><p class="muted">${E(r.cls)} · ${r.row===null?'工作台草稿':`学校原表第 ${r.row} 行`}</p></div><label class="field" style="width:145px">成绩（按平台要求填写）<input data-pf-field="grade" value="${E(r.grade)}" placeholder="留空亦可"></label></div>${pfDraftActions()}${r.originalFeedback?`<div class="summary"><b>原表已有反馈（导出时保留）</b><br>${E(r.originalFeedback)}</div>`:''}${pfSection(r,'daily','第一部分 · 平常表现','选择真实观察，或补充这名学生的具体情况。')}<div class="feedback-card"><div class="panel-head"><div><h3>第二部分 · 考试分析</h3><p class="muted">用本次成绩和历次记录生成分析，也可补充自己的看卷观察。</p></div><button class="smallbtn" data-pf-voice="examNote">🎙 语音输入</button></div>${pfDraftControls(r)}<textarea aria-label="考试观察备注" data-pf-field="examNote" id="pf-examNote" placeholder="考试结束后记录错题、优势或分析要点。">${E(r.examNote)}</textarea>${pfDraftPart(r,'exam')}</div>${pfSection(r,'action','第三部分 · 有效措施','选择适合的措施，必要时录入个性化安排。')}<div class="feedback-card"><div class="panel-head"><div><h3>给 Codex 的个性化备注</h3><p class="muted">例如需要强调的特点、措辞偏好或希望避免的表达。</p></div><button class="smallbtn" data-pf-voice="instruction">🎙 语音输入</button></div><textarea data-pf-field="instruction" id="pf-instruction" placeholder="可留空；会与该生反馈要点一起导出。">${E(r.instruction)}</textarea></div><div class="feedback-card"><h3>全班统一语言风格</h3><p class="hint">作为写作要求随素材导出，您还可以在发给 Codex 时调整。</p><input id="pf-style" value="${E(workspace.style)}" placeholder="例如：亲切自然、具体客观"></div><div class="panel-head"><h3>Codex 素材预览</h3><span class="hint">${template&&r.row!==null?'保存在原表“反馈”列':'随通用素材导出'}</span></div><div class="summary" id="pf-preview">${E(pfContent(r)||'选择标签或输入备注后，在此显示素材。')}</div></div></section></div>`}`}
 function pfManage(type) {
   const daily = type==='daily';
   const body = `<p class="hint">删除只移出标签库；学生已选内容会保留。改写标签会同步更新已选项。</p>
@@ -392,7 +398,7 @@ function pfSetCell(row,ref,value,doc){let ns='http://schemas.openxmlformats.org/
 async function pfExport(generic = false, drafts = false) {
   const workspace = pfActive();
   const group = pf.group === 'legacy' ? '原模板' : pf.group;
-  const records = pfRecords(workspace);
+  const records = pfVisibleRecords(workspace);
   const template = workspace.template;
   const style = workspace.style;
   if (!records.length) return;

@@ -9,6 +9,6 @@ const threeOldExams=views.exams;views.exams=function(){return threeClassPanel(st
 render();
 
 const threeOldStudents=views.students;views.students=function(){let html=threeOldStudents(),s=student();if(s?.comparisonRecords?.length){let existing=(s.exams||[]).length+ssExams.filter(e=>uResolve(s,e).person).length;let extra=s.comparisonRecords.reduce((n,r)=>n+r.scores.filter(x=>x!==null).length,0)-ssExams.filter(e=>e.importTag==='harvey-2026'&&uResolve(s,e).person).length;html=html.replace(`<div class="metric"><small>考试记录</small><b>${existing}</b>`,`<div class="metric"><small>考试记录</small><b>${existing+extra}</b>`);html=html.replace('完整的成绩数据录入后，可查看得分率变化。','已有两次三班成绩；原表未提供满分，暂不绘制得分率。')}return html};
-const threeOldDashboard=views.dashboard;views.dashboard=function(){let html=threeOldDashboard(),old=db.students.reduce((n,s)=>n+s.exams.length,0),extra=db.students.reduce((n,s)=>n+(s.comparisonRecords||[]).reduce((a,r)=>a+r.scores.filter(v=>v!==null).length,0),0);return html.replace(`<span>考试记录</span><strong>${old}</strong>`,`<span>考试记录</span><strong>${old+extra}</strong>`)};
+const threeOldDashboard=views.dashboard;views.dashboard=function(){let html=threeOldDashboard(),roster=activeStudentRoster(),old=roster.reduce((n,s)=>n+s.exams.length,0),extra=roster.reduce((n,s)=>n+(s.comparisonRecords||[]).reduce((a,r)=>a+r.scores.filter(v=>v!==null).length,0),0);return html.replace(`<span>考试记录</span><strong>${old}</strong>`,`<span>考试记录</span><strong>${old+extra}</strong>`)};
 render();
 

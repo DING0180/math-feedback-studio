@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数学走班教学工作台 · IGB / IG1 / IG3</title>
+<style>
+
+  :root{
+    --bg:#eef1f8; --bg2:#e9eef9;
+    --card:#ffffff;
+    --line:#e4e9f3; --line-soft:#eef1f7; --line-strong:#d3dcec;
+    --txt:#22304a; --muted:#7e8da8; --faint:#aab6c9;
+    --pri:#3e6df0; --pri-d:#2c51cf; --pri-bg:#eaf1ff; --pri-bd:#cdddfe;
+    --green:#0f9d5c; --green-bg:#e5f7ee; --green-bd:#bce8d1;
+    --red:#e0454f; --red-bg:#fdecee; --red-bd:#f6c7cb;
+    --orange:#d5850a; --orange-bg:#fcf2dd; --orange-bd:#f1d8a0;
+    --gray:#67758f; --gray-bg:#eef1f6; --gray-bd:#d8deea;
+    --hi-bg:#fde9d5; --hi-bd:#f6c9a0; --hi-tx:#b2590f;
+    --lo-bg:#dceafc; --lo-bd:#b3d1f5; --lo-tx:#2e6fc0;
+    --shadow-sm:0 1px 2px rgba(24,39,74,.05);
+    --shadow-md:0 2px 6px rgba(24,39,74,.05), 0 14px 30px -20px rgba(24,39,74,.22);
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,-apple-system,sans-serif;
+    background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 70%, #e4eaf6 100%);
+    background-attachment:fixed;
+    color:var(--txt); font-size:14px; -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+  input{font-family:inherit;}
+  ::-webkit-scrollbar{height:11px; width:11px;}
+  ::-webkit-scrollbar-thumb{background:#c6cfdf; border-radius:8px; border:3px solid transparent; background-clip:content-box;}
+  ::-webkit-scrollbar-thumb:hover{background:#aeb9cf; border:3px solid transparent; background-clip:content-box;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* ---------- 顶栏 ---------- */
+  header.topbar{
+    background:rgba(255,255,255,.86); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:0 18px; height:58px; display:flex; align-items:center; gap:20px;
+    position:sticky; top:0; z-index:50;
+  }
+  .brand{font-size:15px; font-weight:800; letter-spacing:.3px; white-space:nowrap;
+    display:flex; align-items:center; gap:9px; color:#22304a;}
+  .brand .logo{
+    width:27px; height:27px; border-radius:8px; flex:none;
+    background:linear-gradient(135deg,#5b86f6,#2e56d6); color:#fff;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:800; box-shadow:0 3px 8px -2px rgba(46,86,214,.55);
+  }
+  .brand small{color:var(--muted); font-weight:400; font-size:11px; margin-left:4px; letter-spacing:0;}
+  .class-nav{display:flex; gap:8px; flex:1;}
+  .cls-btn{
+    border:1px solid var(--line); background:#fff; border-radius:10px; padding:6px 15px;
+    font-size:13px; font-weight:600; color:#46536b; display:inline-flex; align-items:center; gap:8px;
+    box-shadow:var(--shadow-sm); transition:.16s;
+  }
+  .cls-btn:hover{border-color:#b9ccfa; color:var(--pri); transform:translateY(-1px);}
+  .cls-btn.on{
+    background:linear-gradient(135deg,#4a76f2,#2e56d6); color:#fff; border-color:transparent;
+    box-shadow:0 5px 14px -4px rgba(46,86,214,.55);
+  }
+  .cls-btn .n{font-size:11px; font-weight:600; opacity:.8;
+    background:rgba(120,140,180,.14); padding:1px 7px; border-radius:20px;}
+  .cls-btn.on .n{background:rgba(255,255,255,.22);}
+  .top-acts{display:flex; gap:8px; align-items:center;}
+  .mini-btn{
+    border:1px solid var(--line); background:#fff; padding:6px 12px; border-radius:9px;
+    font-size:12px; color:#4b5a73; box-shadow:var(--shadow-sm); transition:.15s;
+  }
+  .mini-btn:hover{border-color:var(--pri); color:var(--pri); transform:translateY(-1px);}
+  .save-dot{font-size:11px; color:var(--muted); white-space:nowrap;}
+
+  /* ---------- 视图切换 ---------- */
+  .view-bar{max-width:1380px; margin:0 auto; padding:16px 18px 0; display:flex; gap:6px;}
+  .view-tab{
+    padding:9px 20px; border-radius:12px 12px 0 0; font-size:14px; font-weight:700;
+    color:#6b7a95; display:inline-flex; align-items:center; gap:7px;
+    background:transparent; transition:.15s; position:relative;
+  }
+  .view-tab:hover{background:rgba(255,255,255,.7); color:var(--pri);}
+  .view-tab small{font-weight:400; color:var(--muted); font-size:11px;}
+  .view-tab.on{background:#fff; color:var(--pri);
+    box-shadow:0 -2px 8px rgba(24,39,74,.04), 0 2px 0 0 #fff;}
+  .view-tab.on::before{content:""; position:absolute; top:0; left:14px; right:14px; height:3px;
+    border-radius:0 0 4px 4px; background:linear-gradient(90deg,#5b86f6,#2e56d6);}
+
+  /* ---------- 主体 ---------- */
+  main{max-width:1380px; margin:0 auto; padding:0 18px 40px;}
+  .page-card{background:var(--card); border-radius:var(--radius);
+    box-shadow:var(--shadow-md); margin-top:0; overflow:hidden;
+    border:1px solid rgba(255,255,255,.7);}
+
+  /* ================= 座位 ================= */
+  .seat-wrap{display:flex; gap:16px; padding:16px; align-items:flex-start;}
+  .pool-col{width:252px; flex:none; background:linear-gradient(180deg,#fafcff,#f5f8fe);
+    border:1px solid var(--line); border-radius:14px; padding:13px;
+    position:sticky; top:72px; box-shadow:var(--shadow-sm);}
+  .pool-title{font-weight:800; margin-bottom:2px; font-size:14px;
+    display:flex; justify-content:space-between; align-items:baseline;}
+  .pool-title span{color:var(--muted); font-size:11px; font-weight:500;}
+  .pool-sub{font-size:12px; color:var(--muted); margin-bottom:9px; line-height:1.5;}
+  .add-row{display:flex; gap:6px; margin-bottom:10px;}
+  .add-row input{
+    flex:1; border:1px solid var(--line); border-radius:9px; padding:6px 9px; font-size:12px;
+    min-width:0; background:#fff; transition:.15s; outline:none;
+  }
+  .add-row input:focus{border-color:var(--pri); box-shadow:0 0 0 3px rgba(62,109,240,.12);}
+  .add-row button{border-radius:9px; padding:5px 12px; background:var(--pri-bg);
+    color:var(--pri); border:1px solid var(--pri-bd); font-size:12px; font-weight:700; transition:.15s;}
+  .add-row button:hover{background:#dbe8ff;}
+  .pool-list{display:flex; flex-direction:column; gap:5px; max-height:56vh; overflow:auto; padding-right:2px;}
+  .chip{
+    display:flex; align-items:center; gap:7px; padding:5px 9px; border-radius:10px; background:#fff;
+    border:1px solid var(--line); cursor:grab; user-select:none; font-size:13px;
+    transition:.15s; box-shadow:var(--shadow-sm);
+  }
+  .chip:hover{border-color:#b9ccfa; transform:translateY(-1px); box-shadow:var(--shadow-md);}
+  .chip:active{cursor:grabbing;}
+  .chip.sel{border-color:var(--pri); background:var(--pri-bg); box-shadow:0 0 0 3px rgba(62,109,240,.16);}
+  .chip.dragging{opacity:.45;}
+  .pool-chip .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;}
+  .pool-chip .rm{color:#b9c3d4; font-size:12px; padding:0 3px; visibility:hidden; border-radius:6px;}
+  .pool-chip:hover .rm{visibility:visible;}
+  .pool-chip .rm:hover{color:var(--red); background:var(--red-bg);}
+  .chip .tag{
+    font-size:10px; color:#5b6b88; background:#eef2f8; border-radius:6px;
+    padding:0 5px; line-height:16px; flex:none; font-weight:600;
+  }
+  .pool-tools{margin-top:10px; display:flex; flex-direction:column; gap:6px;}
+  .pool-tools button{
+    border:1px solid var(--line); border-radius:9px; padding:7px; font-size:12px; font-weight:600;
+    background:#fff; color:#4b5a73; transition:.15s;
+  }
+  .pool-tools button:hover{border-color:var(--pri); color:var(--pri); background:var(--pri-bg);}
+  .pool-hint{font-size:11px; color:#a3b0c5; margin-top:9px; line-height:1.7;}
+  .pool-target{border:1.5px dashed #c9d5ea; border-radius:10px; min-height:48px; display:none;}
+  .pool-target.over{background:#f4f8ff; border-color:var(--pri);}
+
+  .stage-col{flex:1; min-width:0;}
+  .stage-toolbar{
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:11px 16px;
+    background:linear-gradient(180deg,#fbfdff,#f4f7fd); border-bottom:1px solid var(--line);
+  }
+  .stage-toolbar .grp{display:flex; align-items:center; gap:7px; font-size:12px; color:#5a6a86; font-weight:600;}
+  .num-ctl{display:inline-flex; align-items:center; border:1px solid var(--line);
+    border-radius:9px; overflow:hidden; background:#fff; box-shadow:var(--shadow-sm);}
+  .num-ctl button{width:25px; height:25px; line-height:1; font-size:15px; color:#5a6a86; transition:.12s;}
+  .num-ctl button:hover{background:var(--pri-bg); color:var(--pri);}
+  .num-ctl b{min-width:32px; text-align:center; font-size:13px;}
+  .toolbar-note{font-size:12px; color:#8fa0b8;}
+  .chk{display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; font-size:13px; color:#46536b;}
+  .chk input{accent-color:var(--pri); width:15px; height:15px; cursor:pointer;}
+  .chk.locked-tip{color:var(--pri); font-weight:600;}
+
+  .stage-body{background:
+      radial-gradient(1000px 300px at 50% -80px, rgba(62,109,240,.06), transparent),
+      linear-gradient(180deg,#fbfdff, #f2f6fc);
+    padding:20px 18px; border-radius:0 0 var(--radius) var(--radius);}
+  .lectern{
+    width:340px; max-width:80%; margin:0 auto 22px; text-align:center; font-size:12px; color:#7c8ba7;
+    border:1px solid var(--pri-bd); background:linear-gradient(180deg,#eef4ff,#e6eefd);
+    border-radius:12px; padding:7px; letter-spacing:12px; font-weight:700;
+    box-shadow:inset 0 1px 0 #fff, var(--shadow-sm);
+  }
+  .seat-grid{display:flex; flex-direction:column; gap:12px; align-items:center;}
+  .seat-row{display:flex; gap:12px; justify-content:center;}
+  .seat{
+    width:100px; height:74px; border-radius:13px; background:#fff;
+    border:1.5px solid #dbe3f0; box-shadow:var(--shadow-sm);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    transition:transform .13s, box-shadow .13s, border-color .13s;
+  }
+  .seat:hover{transform:translateY(-2px); border-color:var(--pri);
+    box-shadow:0 8px 18px -10px rgba(62,109,240,.45);}
+  .seat .av{width:26px; height:26px; font-size:12px;}
+  .seat .seat-inner{font-size:13px; font-weight:600; color:#33425c; text-align:center;
+    padding:3px 4px; line-height:1.3; max-width:100%; display:flex; flex-direction:column;
+    align-items:center; gap:2px;}
+  .seat .snm{font-size:13px; font-weight:700; line-height:1.15;}
+  .seat .seat-tag{font-size:9px; color:#8fa0b8; font-weight:500; line-height:1.1;}
+  .seat:hover{border-color:#a9c0f5;}
+  .seat.empty{border-style:dashed; border-color:#cdd8ea; background:rgba(255,255,255,.5);}
+  .seat.empty .seat-inner{color:#aeb9cc; font-weight:400;}
+/* 座位整块可拖动；点选后再点目标座位也可换座。 */
+.seat[draggable="true"]{cursor:grab;user-select:none}
+.seat[draggable="true"]:active{cursor:grabbing}
+.seat.sel{outline:3px solid #4268ed;outline-offset:3px;box-shadow:0 0 0 6px #4268ed26}
+.seat.dragging{opacity:.45}
+  .seat.dropover{border-color:var(--pri); background:var(--pri-bg); transform:scale(1.04);}
+  .seat .del{
+    position:absolute; top:-7px; right:-7px; width:18px; height:18px; line-height:16px; text-align:center;
+    background:#fff; border:1px solid var(--line-strong); border-radius:50%; color:#9aa8bf;
+    font-size:11px; opacity:0; transition:.12s; box-shadow:var(--shadow-sm);
+  }
+  .seat:hover .del{opacity:1;}
+  .seat .del:hover{background:var(--red); border-color:var(--red); color:#fff;}
+  .seat-num{position:absolute; left:6px; top:4px; font-size:9px; color:#b7c2d6; font-weight:600;}
+  .empty-seat-dots{display:flex; gap:3px;}
+  .empty-seat-dots i{width:5px;height:5px;border-radius:50%;background:#cfd8e8;}
+
+  /* ---------- 成绩徽章 / 成绩锁 / 班级图例 ---------- */
+  .scb{
+    display:inline-flex; align-items:center; font-size:10px; font-weight:800; line-height:15px;
+    padding:0 5px; border-radius:8px; flex:none; vertical-align:1px; letter-spacing:.3px;
+  }
+  .pool-chip .scb{margin-left:auto;}
+  .score-toggle{
+    border:1px solid var(--orange-bd); background:var(--orange-bg); color:var(--orange);
+    border-radius:9px; padding:5px 11px; font-size:12px; font-weight:700; white-space:nowrap;
+    transition:.15s; box-shadow:var(--shadow-sm);
+  }
+  .score-toggle:hover{transform:translateY(-1px); filter:brightness(.97);}
+  .score-toggle.on{
+    border-color:var(--green-bd); background:var(--green-bg); color:var(--green);
+  }
+  .cls-legend{
+    display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;
+    margin-top:16px; padding-top:12px; border-top:1px dashed var(--line);
+  }
+  .cls-legend .lg-t{font-size:11px; color:#8fa0b8; font-weight:700;}
+  .cls-legend .lg-chip{
+    font-size:11px; font-weight:800; border-radius:14px; padding:1px 9px; line-height:18px;
+  }
+  .cls-legend .lg-note{font-size:11px; color:#a3b0c5; margin-left:6px;}
+
+  /* ---------- 头像 ---------- */
+  .av{
+    width:22px; height:22px; border-radius:50%; flex:none; color:#fff;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; line-height:1; letter-spacing:0;
+    box-shadow:inset 0 -1px 0 rgba(0,0,0,.14);
+  }
+
+  /* ================= 作业 ================= */
+  .hw-wrap{padding:16px;}
+  .hw-toolbar{display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-bottom:10px;}
+  .palette{
+    display:flex; gap:5px; align-items:center; flex-wrap:wrap;
+    background:#f4f7fc; border:1px solid var(--line); padding:6px 8px; border-radius:12px;
+  }
+  .palette .lbl{font-size:12px; color:#7d8ca6; font-weight:600; margin-right:3px;}
+  .p-btn{
+    border:1px solid transparent; background:#fff; border-radius:8px; padding:5px 9px;
+    font-size:12px; display:inline-flex; align-items:center; gap:5px; color:#46536b;
+    box-shadow:var(--shadow-sm); transition:.12s; font-weight:600;
+  }
+  .p-btn b{font-size:13px; line-height:1;}
+  .p-btn:hover{transform:translateY(-1px);}
+  .p-btn.on{box-shadow:0 0 0 2px #fff, 0 0 0 4px rgba(62,109,240,.35); border-color:var(--pri); color:var(--pri);}
+  .p-div{width:1px; height:22px; background:var(--line); margin:0 5px;}
+  .p-btn.done b{color:var(--green);}
+  .p-btn.miss b{color:var(--red);}
+  .p-btn.late b{color:var(--orange);}
+  .p-btn.leave b{color:var(--gray);}
+  .p-btn.hi b{color:var(--hi-tx);}
+  .p-btn.lo b{color:var(--lo-tx);}
+  .hw-btn{
+    border:1px solid var(--pri-bd); color:var(--pri); background:var(--pri-bg);
+    border-radius:9px; padding:6px 13px; font-size:12px; font-weight:700; white-space:nowrap;
+    transition:.15s; display:inline-flex; align-items:center; gap:5px;
+  }
+  .hw-btn:hover{background:#dce9ff; transform:translateY(-1px); box-shadow:var(--shadow-sm);}
+  .hw-hint{font-size:12px; color:#97a5bb; line-height:1.6; margin-bottom:10px;}
+
+  /* ---------- 概览条 ---------- */
+  .ov{
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px;
+    background:linear-gradient(180deg,#ffffff,#f8fafd);
+    border:1px solid var(--line); border-radius:13px; padding:11px 14px; margin-bottom:12px;
+    box-shadow:var(--shadow-sm);
+  }
+  .ov-hd{display:flex; align-items:center; gap:9px; flex:none;}
+  .ov-tag{
+    font-size:11px; font-weight:700; color:var(--pri); background:var(--pri-bg);
+    border:1px solid var(--pri-bd); padding:2px 8px; border-radius:20px; letter-spacing:.5px;
+  }
+  .ov-week{font-size:15px; font-weight:800; color:#22304a;}
+  .ov-idle{color:#a3b0c5; font-size:13px; flex:1;}
+  .ov-g{display:flex; flex-direction:column; gap:3px; min-width:170px; flex:1 1 170px;}
+  .ov-gt{display:flex; justify-content:space-between; font-size:12px; color:#7e8da8; font-weight:600;}
+  .ov-gt b{font-size:14px; color:#22304a;}
+  .ov-pct{color:var(--pri);}
+  .bar{height:7px; border-radius:5px; background:rgba(70,83,107,.09); overflow:hidden;}
+  .bar i{display:block; height:100%; width:0; border-radius:5px;
+    background:linear-gradient(90deg,#7ba3f8,#3e6df0); transition:width .4s;}
+  .bar i.ok{background:linear-gradient(90deg,#3dd68c,#0f9d5c);}
+  .bar i.mid{background:linear-gradient(90deg,#ffd166,#ef9f1f);}
+  .bar i.low{background:linear-gradient(90deg,#ff8f97,#e0454f);}
+  .ov-st{display:flex; gap:6px; flex-wrap:wrap; flex:none;}
+  .ov-k{font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px; line-height:1.5;}
+  .ov-k b{font-size:12px;}
+  .ov-k.d{background:var(--green-bg); color:var(--green); border:1px solid var(--green-bd);}
+  .ov-k.x{background:var(--red-bg); color:var(--red); border:1px solid var(--red-bd);}
+  .ov-k.p{background:var(--orange-bg); color:var(--orange); border:1px solid var(--orange-bd);}
+  .ov-k.l{background:var(--gray-bg); color:var(--gray); border:1px solid var(--gray-bd);}
+  .ov-need{display:flex; align-items:flex-start; gap:7px; flex:1 1 240px; min-width:0;}
+  .ov-nt{font-size:11px; color:#b2590f; background:#fdece2; border:1px solid #f6cdb4;
+    padding:2px 7px; border-radius:20px; font-weight:700; flex:none; margin-top:2px;}
+  .ov-chips{display:flex; gap:5px; flex-wrap:wrap; min-width:0;}
+  .stu-chip{
+    font-size:12px; font-weight:700; border-radius:20px; padding:2px 10px; line-height:20px;
+    display:inline-flex; align-items:center; gap:4px; transition:.12s; border:1px solid transparent;
+  }
+  .stu-chip.miss{background:#fff; color:var(--red); border-color:var(--red-bd);}
+  .stu-chip.late{background:#fff; color:var(--orange); border-color:var(--orange-bd);}
+  .stu-chip:hover{transform:translateY(-1px); box-shadow:var(--shadow-sm); background:#fff;}
+  .stu-chip.miss:hover{border-color:var(--red);}
+  .stu-chip.late:hover{border-color:var(--orange);}
+  .ov-all{font-size:13px; font-weight:700; color:var(--green); background:var(--green-bg);
+    border:1px solid var(--green-bd); padding:5px 13px; border-radius:20px; flex:none;}
+  .ov-acts{display:flex; gap:6px; flex:none; margin-left:auto;}
+  .ov-btn{
+    border:1px solid var(--line); background:#fff; border-radius:9px; padding:6px 12px;
+    font-size:12px; font-weight:700; color:#5a6a86; transition:.15s; white-space:nowrap;
+    box-shadow:var(--shadow-sm);
+  }
+  .ov-btn:hover{border-color:var(--pri); color:var(--pri);}
+  .ov-btn.pri{background:linear-gradient(135deg,#4a76f2,#2e56d6); color:#fff; border-color:transparent;}
+  .ov-btn.pri:hover{box-shadow:0 5px 12px -3px rgba(46,86,214,.5);}
+
+  /* ---------- 作业表格 ---------- */
+  .tbl-box{overflow:auto; border:1px solid var(--line); border-radius:13px;
+    max-height:66vh; background:#fff; box-shadow:var(--shadow-sm);}
+  table.hw{border-collapse:separate; border-spacing:0; min-width:100%;}
+  table.hw th, table.hw td{border-bottom:1px solid var(--line-soft); border-right:1px solid var(--line-soft);}
+  table.hw tbody tr:last-child td{border-bottom:none;}
+  table.hw thead th{position:sticky; top:0; z-index:5; font-weight:700; font-size:12px; color:#46536b;
+    background:linear-gradient(180deg,#f8fafe,#eef2fa); border-bottom:1px solid var(--line);}
+  .th-stu{position:sticky; left:0; z-index:10; background:linear-gradient(180deg,#f8fafe,#eef2fa) !important;
+    text-align:center; font-size:13px; min-width:74px;}
+  th.week{min-width:112px; text-align:center; padding:8px 5px 6px; position:relative;}
+  th.week .wl{display:inline-block; max-width:84px; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; font-size:13px; font-weight:800;}
+  th.week .menu{
+    position:absolute; right:4px; top:5px; width:19px; height:19px; line-height:16px;
+    border-radius:6px; color:#9aa8bf; font-size:13px; opacity:0; transition:.12s;
+  }
+  th.week:hover .menu{opacity:1;}
+  th.week .menu:hover{background:#e0e8f8; color:var(--pri);}
+  th.week .cnt{font-weight:500; font-size:10px; color:#8fa0b8; margin-top:3px; line-height:1.4;
+    display:block; letter-spacing:.2px;}
+  th.week .wkbar{display:block; height:5px; border-radius:3px; margin:5px 6px 0;
+    background:rgba(70,83,107,.09); overflow:hidden;}
+  th.week .wkbar i{display:block; height:100%; width:0; border-radius:3px;
+    background:linear-gradient(90deg,#7ba3f8,#3e6df0);}
+  th.week .wkbar i.full{background:linear-gradient(90deg,#3dd68c,#0f9d5c);}
+  th.week .wkbar i.ok{background:linear-gradient(90deg,#7ba3f8,#3e6df0);}
+  th.week .wkbar i.mid{background:linear-gradient(90deg,#ffd166,#ef9f1f);}
+  th.week .wkbar i.low{background:linear-gradient(90deg,#ff8f97,#e0454f);}
+  th.week.last .wl{color:var(--pri);}
+  th.week.last::before{content:""; position:absolute; left:6px; right:6px; top:0; height:3px;
+    border-radius:0 0 4px 4px; background:linear-gradient(90deg,#5b86f6,#2e56d6);}
+  @keyframes wkflash{0%,50%{background:var(--pri-bg);}100%{background:transparent;}}
+  th.week.flash{animation:wkflash 1s ease 1;}
+  /* ---- 两级表头：第一行周汇总（固定高，第二行天表头吸顶错开） ---- */
+  thead tr:first-child th.week{height:42px; box-sizing:border-box; padding:4px 5px; top:0; z-index:6;}
+  thead tr:first-child th.th-stu{top:0; z-index:11; height:42px;}
+  thead tr:nth-child(2) th.day{top:42px;}
+  th.day{min-width:88px; text-align:center; padding:4px 4px 4px; position:relative;
+    background:linear-gradient(180deg,#f6f9ff,#edf2fb);}
+  th.day .dl{display:inline-block; font-size:12px; font-weight:800; color:#46536b; cursor:text;}
+  th.day .dl:hover{color:var(--pri);}
+  th.day .menu{
+    position:absolute; right:3px; top:3px; width:17px; height:17px; line-height:15px;
+    border-radius:5px; color:#9aa8bf; font-size:12px; opacity:0; transition:.12s;
+  }
+  th.day:hover .menu{opacity:1;}
+  th.day .menu:hover{background:#e0e8f8; color:var(--pri);}
+  th.day .dcnt{display:block; font-size:10px; color:#8fa0b8; margin-top:1px; line-height:1.3; font-weight:600;}
+  th.day .wkbar{display:block; height:4px; border-radius:3px; margin:3px 6px 1px;
+    background:rgba(70,83,107,.09); overflow:hidden;}
+  th.day .wkbar i{display:block; height:100%; width:0; border-radius:3px;
+    background:linear-gradient(90deg,#7ba3f8,#3e6df0);}
+  th.day .wkbar i.full{background:linear-gradient(90deg,#3dd68c,#0f9d5c);}
+  th.day .wkbar i.low{background:linear-gradient(90deg,#ff8f97,#e0454f);}
+  th.day.last .dl{color:var(--pri);}
+  th.day.last::before{content:""; position:absolute; left:5px; right:5px; top:0; height:3px;
+    border-radius:0 0 4px 4px; background:linear-gradient(90deg,#5b86f6,#2e56d6);}
+  th.day.flash{animation:wkflash 1s ease 1;}
+  td.rc{position:relative; height:46px; min-width:82px; cursor:pointer; text-align:center;
+    vertical-align:middle; user-select:none; transition:background .1s; font-size:15px;}
+  td.rc:hover{background:#f2f6ff; box-shadow:inset 0 0 0 1px rgba(62,109,240,.22);}
+  .cell-mark{display:inline-block; min-width:30px; font-size:15px; font-weight:800;
+    line-height:24px; border-radius:9px; padding:0 5px; letter-spacing:0;}
+  .mark-done{background:var(--green-bg); color:var(--green); border:1px solid var(--green-bd);}
+  .mark-miss{background:var(--red-bg); color:var(--red); border:1px solid var(--red-bd);}
+  .mark-late{background:var(--orange-bg); color:var(--orange); border:1px solid var(--orange-bd);}
+  .mark-leave{background:var(--gray-bg); color:var(--gray); border:1px solid var(--gray-bd);}
+  .cell-empty{color:#cfd8e6; font-weight:600;}
+  .q-badge{position:absolute; top:3px; right:4px; font-size:9px; line-height:14px;
+    padding:0 5px; border-radius:7px; font-weight:800; box-shadow:var(--shadow-sm);}
+  .q-hi{background:var(--hi-bg); color:var(--hi-tx); border:1px solid var(--hi-bd);}
+  .q-lo{background:var(--lo-bg); color:var(--lo-tx); border:1px solid var(--lo-bd);}
+  td.rname{position:sticky; left:0; background:#fff; z-index:4; min-width:188px;
+    padding:6px 10px; cursor:default; text-align:left; white-space:nowrap;}
+  tr:hover td.rname{background:#f4f7fd;}
+  td.rname .nml{display:inline-flex; flex-direction:column; gap:1px; vertical-align:middle;
+    margin-left:7px; max-width:calc(100% - 58px); min-width:0;}
+  td.rname .nm{font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  td.rname .meta{display:flex; gap:4px; align-items:center; line-height:1;}
+  .rstat{font-size:10px; padding:0 6px; border-radius:5px; line-height:16px; font-weight:800;
+    display:inline-block; letter-spacing:.2px;}
+  .rstat.x{background:var(--red-bg); color:var(--red);}
+  .rstat.p{background:var(--orange-bg); color:var(--orange);}
+  .rstat.hi{background:var(--hi-bg); color:var(--hi-tx);}
+  .rname .del{visibility:hidden; font-size:11px; color:#b9c3d4; float:right; line-height:24px;
+    border-radius:6px; padding:0 4px;}
+  tr:hover td.rname .del{visibility:visible;}
+  .rname .del:hover{color:var(--red); background:var(--red-bg);}
+  tr:hover td{background:#f6f9ff;}
+  @keyframes rowflash{0%,45%{background:#fff0c2;}100%{background:transparent;}}
+  tr.rowflash td{animation:rowflash 1.8s ease 1;}
+
+  /* 行头部第一格（角） */
+  th.corner{position:sticky; left:0; top:0; z-index:15; min-width:74px;
+    background:linear-gradient(180deg,#f8fafe,#eef2fa) !important;}
+
+  /* 图例 */
+  .legend-row{display:flex; gap:6px 18px; flex-wrap:wrap; margin-top:11px; font-size:12px; color:#5a6a86;}
+  .legend-row .lg{display:flex; align-items:center; gap:6px; font-weight:600;}
+  .legend-row .cell-mark{min-width:20px; line-height:20px; font-size:12px; padding:0 4px; border-radius:6px;}
+  .legend-row .q-badge{position:static; line-height:16px; font-size:10px;}
+
+  /* ---------- 右键菜单 / 下拉 ---------- */
+  .menu-pop{
+    position:fixed; background:#fff; border:1px solid var(--line); border-radius:12px;
+    box-shadow:0 10px 32px rgba(16,30,70,.18); min-width:150px; z-index:200; padding:6px;
+    display:none; animation:popin .12s ease;
+  }
+  @keyframes popin{from{opacity:0; transform:scale(.97) translateY(-2px);} to{opacity:1; transform:none;}}
+  .menu-pop .mi{padding:7px 10px; border-radius:8px; font-size:13px; color:#35445d;
+    display:flex; justify-content:space-between; gap:14px; align-items:center; transition:.1s; cursor:pointer;}
+  .menu-pop .mi:hover{background:#eef4ff; color:var(--pri);}
+  .menu-pop .sep{height:1px; background:var(--line-soft); margin:5px 8px;}
+  .menu-pop .tt{font-size:11px; color:#8fa0b8; padding:3px 10px 5px; font-weight:700; letter-spacing:.3px;}
+
+  /* ---------- 遮罩帮助 ---------- */
+  .mask{position:fixed; inset:0; background:rgba(18,30,60,.46); backdrop-filter:blur(3px);
+    z-index:300; display:none; align-items:center; justify-content:center;}
+  .mask.show{display:flex;}
+  .dialog{background:#fff; border-radius:18px; width:660px; max-width:92vw; max-height:84vh;
+    overflow:auto; padding:22px 26px; box-shadow:0 24px 60px -18px rgba(10,20,50,.5); animation:popin .16s ease;}
+  .dialog h3{margin-bottom:12px; font-size:17px; display:flex; align-items:center; gap:8px;}
+  .dialog .sect{margin:13px 0;}
+  .dialog .sect h4{font-size:14px; margin-bottom:5px; color:var(--pri);
+    padding-left:9px; border-left:3px solid var(--pri); line-height:1.3;}
+  .dialog .sect li{margin-left:19px; line-height:2; font-size:13px; color:#3d4c66;}
+  .dialog .kbd{background:#f0f3f9; border:1px solid #dde4ef; border-radius:5px; padding:0 6px;
+    font-size:12px; color:#5a6a86;}
+  .dialog .close{margin-top:14px; width:100%; background:linear-gradient(135deg,#4a76f2,#2e56d6);
+    color:#fff; padding:10px; border-radius:11px; font-weight:700; font-size:14px; transition:.15s;}
+  .dialog .close:hover{box-shadow:0 6px 16px -6px rgba(46,86,214,.6); transform:translateY(-1px);}
+
+  #toast{
+    position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(16px);
+    background:#22304a; color:#fff; padding:9px 20px; border-radius:24px; font-size:13px;
+    opacity:0; transition:.22s; z-index:400; pointer-events:none; font-weight:600;
+    box-shadow:0 10px 26px -6px rgba(10,25,60,.4); max-width:86vw;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .empty-tip{color:#a3aec4; font-size:12px; text-align:center; padding:28px;}
+
+.chapter-page{background:#fff;border:1px solid #e3e8f2;border-radius:18px;padding:26px 28px;box-shadow:0 6px 30px #28457206}
+.chapter-heading{display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:24px;flex-wrap:wrap}
+.chapter-heading h2{font-size:22px;letter-spacing:.02em;margin:0 0 7px;color:#233552}
+.chapter-heading p{font-size:13px;color:#8491a7;margin:0}
+.chapter-add{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chapter-input{box-sizing:border-box;border:1px solid #dce3ee;border-radius:10px;background:#fff;padding:11px 13px;font:inherit;font-size:14px;width:290px;max-width:100%;outline:none}
+.chapter-primary{border:0;border-radius:10px;background:#4268ed;color:white;padding:12px 17px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.chapter-input:focus{border-color:#4268ed;box-shadow:0 0 0 3px #4268ed16}
+.chapter-table-scroll{overflow:auto;max-height:calc(100vh - 290px);min-height:240px;border:1px solid #e1e7f0;border-radius:13px}
+.chapter-table{border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:100%;width:max-content;text-align:center;color:#34445e}
+.chapter-table th,.chapter-table td{padding:0;border-right:1px solid #edf0f6;border-bottom:1px solid #edf0f6;box-sizing:border-box;width:190px;min-width:190px;max-width:190px}
+.chapter-table thead th{position:sticky;top:0;background:#f6f8fc;z-index:2;height:65px}
+.chapter-table tr>:first-child{position:sticky;left:0;width:210px;min-width:210px;max-width:210px;background:#fff;z-index:1;border-right:1px solid #dfe6f0}
+.chapter-table thead th:first-child{z-index:3;background:#f6f8fc}
+.chapter-table tbody tr:hover td,.chapter-table tbody tr:hover th{background:#fafbfe}
+.chapter-table tbody tr:last-child>*{border-bottom:0}
+.chapter-table tr>:last-child{border-right:0}
+.chapter-student-head{font-size:14px;text-align:left;padding-left:20px!important}
+.chapter-student-head span{font-size:12px;font-weight:400;color:#8b97ab}
+.chapter-title{width:100%;padding:14px 16px;min-height:65px;line-height:1.5;border:0;background:transparent;color:#42536e;font-size:14px;font-weight:700;cursor:pointer;overflow-wrap:anywhere}
+.chapter-title span{color:#a0abc0;font-weight:400}
+.chapter-title:hover{color:#4268ed;background:#edf2ff}
+.chapter-student{display:flex;align-items:center;gap:11px;padding:12px 18px;text-align:left;min-height:65px;box-sizing:border-box}
+.chapter-student b{font-size:14px;font-weight:650;display:block}
+.chapter-student small{display:block;font-size:11px;color:#8794a9;margin-top:3px;font-weight:400}
+.grade-cell{display:block;margin:0;width:100%;min-height:65px;border:0;border-radius:0;background:transparent;cursor:pointer;font-size:19px;font-weight:700;color:#c4cddd;transition:background .12s}
+.grade-cell:hover{background:#edf2ff;box-shadow:inset 0 0 0 2px #c9d5ff}
+.grade-A{color:#118064;background:#eaf7f1}
+.grade-B{color:#4265bb;background:#edf3ff}
+.grade-C{color:#ad7428;background:#fff5e7}
+.grade-cell:focus-visible,.chapter-title:focus-visible,.chapter-primary:focus-visible,.grade-option:focus-visible,.grade-clear:focus-visible{outline:3px solid #819cff;outline-offset:-3px}
+.chapter-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;font-size:12px;color:#96a0b2}
+.chapter-footer button{background:none;border:0;padding:5px;color:#6b7da2;font-size:12px;cursor:pointer}
+.chapter-empty{text-align:center;padding:85px 16px 100px;border:1px dashed #dce4f0;border-radius:14px;background:#fcfdff}
+.chapter-empty-symbol{font-size:29px;color:#708cd8;font-weight:750;letter-spacing:12px;margin-bottom:20px}
+.chapter-empty-symbol span{color:#97adcF}
+.chapter-empty h3{font-size:17px;color:#42536e;margin:0 0 10px}
+.chapter-empty p{font-size:13px;color:#98a3b6;margin:0;line-height:1.8}
+#menuPop.chapter-picker{position:fixed;width:248px;min-width:0;box-sizing:border-box;padding:14px;border:1px solid #dce4f1;border-radius:14px;box-shadow:0 12px 42px #22335228;background:white;z-index:1100}
+.grade-context{font-size:12px;font-weight:650;color:#42536e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:12px}
+.grade-context span{font-weight:400;color:#8b96aa}
+.grade-options{display:flex;gap:8px}
+.grade-option{flex:1;font-size:23px;font-weight:750;border:2px solid transparent;border-radius:10px;height:52px;cursor:pointer}
+.grade-option:hover,.grade-option[aria-pressed=true]{border-color:currentColor}
+.grade-clear{width:100%;border:0;border-radius:7px;background:#f6f8fb;color:#8491a7;margin-top:10px;padding:7px;cursor:pointer;font-size:12px}
+.chapter-dialog-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
+.chapter-dialog-actions button{padding:10px 18px;border:0;border-radius:9px;cursor:pointer}
+#renameChapterInput{width:100%}
+@media(max-width:680px){.chapter-page{padding:18px 12px}.chapter-heading{gap:16px}.chapter-add{width:100%;flex-wrap:nowrap;gap:7px}.chapter-add input{width:100%;min-width:0;flex:1}.chapter-primary{padding:12px 10px;font-size:12px}.chapter-table-scroll{max-height:65vh}.chapter-table tr>:first-child{width:145px;min-width:145px;max-width:145px}.chapter-table th,.chapter-table td{width:150px;min-width:150px;max-width:150px}.chapter-student{padding:10px;gap:7px}.chapter-student .av{width:26px;height:26px;font-size:12px}.chapter-heading p{font-size:12px}}
+
+
+/* 紧凑显示：仅调整样式，保留全部名单、章节、等级与座位数据。 */
+header.topbar{height:44px;padding:0 12px;gap:14px}
+.brand{font-size:13px;gap:6px}
+.brand small{font-size:10px}
+.class-nav{gap:6px}
+.cls-btn{font-size:12px;padding:4px 11px;border-radius:8px;gap:6px}
+.cls-btn .n{font-size:10px;padding:1px 5px}
+.top-acts{gap:6px}
+.mini-btn{font-size:11px;padding:5px 9px;border-radius:7px}
+.view-bar{max-width:none;padding:8px 12px 0;gap:4px}
+.view-tab{padding:7px 15px;font-size:12px;gap:6px;border-radius:9px 9px 0 0}
+.view-tab small{font-size:10px}
+main{max-width:none;padding:0 12px 10px}
+.chapter-page{padding:12px 14px;border-radius:12px}
+.chapter-heading{gap:12px;margin-bottom:12px}
+.chapter-heading h2{font-size:16px;margin-bottom:3px}
+.chapter-heading p{font-size:11px;line-height:1.4}
+.chapter-add{gap:7px}
+.chapter-add .chapter-input{width:240px;padding:7px 10px;font-size:12px;border-radius:8px}
+.chapter-add .chapter-primary{padding:8px 12px;font-size:12px;border-radius:8px}
+.chapter-table-scroll{max-height:calc(100vh - 181px);max-height:calc(100dvh - 181px);min-height:180px;border-radius:8px}
+.chapter-table th,.chapter-table td{width:118px;min-width:118px;max-width:118px}
+.chapter-table tr>:first-child{width:158px;min-width:158px;max-width:158px}
+.chapter-table thead th{height:42px}
+.chapter-student-head{font-size:12px;padding-left:10px!important}
+.chapter-student-head span{font-size:10px}
+.chapter-title{min-height:42px;padding:5px 7px;font-size:11px;line-height:1.4}
+.chapter-student{min-height:32px;padding:4px 9px;gap:6px}
+.chapter-student .av{width:19px;height:19px;min-width:19px;font-size:10px;line-height:19px;border-radius:6px}
+.chapter-student>div{display:flex;align-items:baseline;gap:5px;min-width:0;flex-wrap:wrap}
+.chapter-student b{font-size:12px;line-height:1.3;white-space:nowrap}
+.chapter-student small{font-size:10px;line-height:1.3;margin-top:0;white-space:nowrap}
+.grade-cell{min-height:32px;padding:3px 0;font-size:14px;line-height:24px}
+.chapter-footer{margin-top:7px;font-size:10px;gap:8px}
+.chapter-footer button{padding:2px 4px;font-size:10px}
+.chapter-empty{padding:45px 12px 55px}
+.seat-wrap{gap:10px;padding:10px}
+.pool-col{width:216px;padding:10px;border-radius:10px;top:54px}
+.pool-title{font-size:12px}
+.pool-title span{font-size:10px}
+.pool-sub{font-size:11px;margin-bottom:6px}
+.pool-list{gap:3px;max-height:calc(100vh - 300px)}
+.pool-chip{padding:4px 6px;font-size:12px;gap:5px;border-radius:7px}
+.pool-chip .av{width:21px;height:21px;font-size:11px}
+.pool-tools{margin-top:7px;gap:4px}
+.pool-tools button{font-size:11px;padding:5px}
+.pool-hint{font-size:10px;line-height:1.5;margin-top:6px}
+.stage-toolbar{gap:10px;padding:7px 10px}
+.stage-toolbar .grp,.chk,.score-toggle{font-size:11px}
+.toolbar-note{font-size:10px}
+.stage-body{padding:10px 12px}
+.lectern{width:280px;margin-bottom:12px;padding:4px;font-size:11px;border-radius:8px}
+.seat-grid,.seat-row{gap:8px}
+.seat{width:92px;height:64px;border-radius:9px}
+.seat .av{width:19px;height:19px;font-size:10px}
+.seat .seat-inner{font-size:12px;gap:1px;padding:3px}
+.seat .snm{font-size:12px}
+.cls-legend{gap:5px;margin-top:10px;padding-top:7px}
+.cls-legend .lg-chip,.cls-legend .lg-t,.cls-legend .lg-note{font-size:10px}
+@media(max-width:760px){
+  header.topbar{height:auto;min-height:44px;flex-wrap:wrap;padding:7px 10px;gap:8px}
+  .brand small{font-size:9px}
+  .view-bar{padding:6px 8px 0}
+  main{padding:0 8px 8px}
+  .chapter-page{padding:10px}
+  .chapter-heading{gap:8px;margin-bottom:10px}
+  .chapter-add .chapter-input{width:100%;min-width:0}
+  .chapter-table-scroll{max-height:calc(100dvh - 235px);min-height:160px}
+  .chapter-table th,.chapter-table td{width:108px;min-width:108px;max-width:108px}
+  .chapter-table tr>:first-child{width:148px;min-width:148px;max-width:148px}
+  .chapter-student{padding:4px 7px;gap:5px}
+  .chapter-student .av{width:18px;height:18px;min-width:18px;font-size:9px}
+  .seat-wrap{flex-wrap:wrap}
+  .pool-col{width:100%;position:static}
+  .pool-list{max-height:180px}
+  .stage-col{width:100%;overflow-x:auto}
+}
+
+
+/* 同一行政班相邻显示；分组边界不新增行。 */
+.chapter-table .admin-group-start>th,.chapter-table .admin-group-start>td{border-top:2px solid #dbe3ef}
+.chapter-student>div{gap:7px}
+
+/* 教学计划：七天可调整的个人课表 */
+body{background:#f2f5f9;color:#26364e}
+header.topbar{height:auto;min-height:64px;padding:12px 24px;flex-wrap:wrap;background:#fff;backdrop-filter:none;gap:12px 24px}
+.brand{font-size:16px;letter-spacing:0}.brand small{font-size:11px}
+main,.view-bar{max-width:1640px;padding-left:24px;padding-right:24px}
+.view-bar{padding-top:22px;gap:8px}.view-tab{padding:12px 22px}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #3867d6;outline-offset:3px}
+button:disabled{cursor:not-allowed;opacity:.45;transform:none}
+::selection{background:#cfdfff;color:#203a6b}
+input,textarea{caret-color:#365fc6}
+.plan-page{background:#fff;border:1px solid #e0e6ef;border-radius:0 14px 14px 14px;padding:24px;box-shadow:none}
+.plan-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+.plan-heading h2{font-size:25px;line-height:1.4;letter-spacing:-.5px;color:#243953}.plan-heading p{font-size:13px;line-height:1.6;color:#64748b;margin-top:5px}
+.plan-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plan-week-select,.plan-btn{font:inherit;font-size:13px;min-height:40px;border:1px solid #d2dceb;border-radius:8px;padding:8px 12px;background:#fff;color:#354c6c}
+.plan-week-select{min-width:120px;max-width:230px}.plan-btn{font-weight:600}.plan-btn:hover:not(:disabled){background:#edf3ff;border-color:#9db5e4;color:#2f55ba}
+#newPlanWeek{background:#3f64cd;border-color:#3f64cd;color:#fff}#newPlanWeek:hover{background:#3357bd}
+.plan-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 0 14px;border-bottom:1px solid #e6ebf2;flex-wrap:wrap}
+.plan-grade-filter{display:flex;flex-wrap:wrap;gap:4px;background:#f0f3f8;padding:4px;border-radius:10px}
+.plan-filter{border-radius:7px;padding:9px 14px;font:inherit;font-size:13px;font-weight:700;color:#56647a;min-height:38px}
+.plan-filter em{font-style:normal;font-size:12px;font-weight:400;margin-left:4px}.plan-filter.active{background:#fff;color:#3158bd;box-shadow:0 2px 5px rgba(30,55,90,.08)}.plan-filter.g9.active{color:#8d5b21}
+.plan-guidance{font-size:12px;color:#627087;line-height:1.75;margin:14px 0 18px}
+.plan-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;align-items:stretch}
+.plan-day{min-width:0;padding:12px;background:#f7f9fc;border:1px solid #e2e8f0;border-radius:12px;display:flex;flex-direction:column}
+.plan-day.weekend{background:#fcfaf6;border-color:#e9e3d9}
+.plan-day-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding-bottom:10px;border-bottom:1px solid #e0e6ef}
+.plan-day-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap}.plan-day-name small{font-size:10px;font-weight:500;color:#796a52}
+.plan-day-count{font-size:12px;color:#627087;white-space:nowrap;font-variant-numeric:tabular-nums}
+.plan-day-actions{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px;padding:6px 0}
+.plan-day-actions button{font:inherit;font-size:11px;min-height:32px;padding:4px 2px;color:#4c6388;border-radius:4px}.plan-day-actions button:hover:not(:disabled){background:#e9eff9;color:#2c54b2}.plan-day-actions .plan-clear{color:#92505c}
+.plan-lessons{flex:1;min-width:0}
+.plan-lesson{width:100%;display:block;text-align:left;min-width:0;padding:11px;margin:0 0 10px;border:1px solid #d9e3f7;background:#fff;border-radius:9px;transition:background .15s,border-color .15s}
+.plan-lesson:hover{background:#eef4ff;border-color:#8fa9e1}.plan-lesson.g9{border-color:#e9dcc7}.plan-lesson.g9:hover{background:#fff8ec;border-color:#cba565}
+.plan-lesson-top{display:flex;align-items:center;justify-content:space-between;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.plan-lesson .grade{font-size:12px;line-height:1.5;font-weight:700;color:#3558ab;background:#eaf0fc;padding:2px 7px;border-radius:4px;overflow-wrap:anywhere}
+.plan-lesson.g9 .grade{color:#885a20;background:#fcf0db}.plan-lesson.other .grade{color:#526279;background:#edf0f4}
+.plan-order{font-size:11px;color:#66758b;white-space:nowrap;font-variant-numeric:tabular-nums}
+.plan-line{display:block;font-size:12px;line-height:1.8;color:#465875;overflow-wrap:anywhere;white-space:pre-wrap}
+.plan-line b{font-size:11px;font-weight:500;color:#6c788b;margin-right:6px}.plan-line .blank{color:#68778d}
+.plan-note{display:block;border-top:1px solid #e8edf4;margin-top:8px;padding-top:7px;font-size:11px;color:#746043;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap}
+.plan-edit-hint{display:block;color:#546f9b;font-size:10px;margin-top:9px}
+.plan-empty{padding:24px 5px 32px;text-align:center;color:#65748a;line-height:1.8;font-size:11px}.plan-empty strong{display:block;font-weight:500;font-size:13px;margin-bottom:6px}.plan-empty span{display:block}
+.plan-add{width:100%;min-height:40px;border:1px dashed #aebfd9;border-radius:7px;color:#3e5e97;font:inherit;font-size:12px;background:#fff;margin-top:4px;padding:9px 3px}.plan-add:hover{background:#edf3ff;border-color:#557aca}
+.plan-homework{margin-top:16px;padding-top:14px;border-top:1px solid #d6dfec}
+.plan-homework h4{font-size:14px;font-weight:700;color:#314763;margin:0 0 4px}
+.plan-homework>p{font-size:11px;line-height:1.7;color:#627087;margin-bottom:10px}
+.plan-homework-label{display:block;font-size:11px;font-weight:600;color:#3558ab;margin:10px 0 6px}.plan-homework-label.g9{color:#885a20}.plan-homework-label.other{color:#526279}
+.plan-homework-input{display:block;width:100%;min-width:0;min-height:92px;resize:vertical;border:1px solid #cbd6e5;border-radius:7px;background:#fff;color:#344864;font:inherit;font-size:12px;line-height:1.8;padding:9px;overflow-wrap:anywhere;transition:border-color .15s}
+.plan-homework-input::placeholder{color:#69798e}.plan-homework-input:hover{border-color:#a1b3d1}.plan-homework-input:focus{border-color:#557aca}
+.plan-footer{margin-top:18px;padding-top:15px;border-top:1px solid #e6ebf2;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;color:#64748b;line-height:1.8}
+.dialog[data-plan-dialog]{width:560px;padding:26px;max-height:90dvh;border-radius:14px;box-shadow:0 18px 60px rgba(20,35,60,.2)}
+.plan-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.plan-form-row>div{min-width:0}
+.plan-dialog-label{display:block;font-size:12px;font-weight:600;color:#4c5f7b;margin:14px 0 6px}
+.plan-dialog-input,.plan-dialog-textarea{width:100%;min-height:40px;border:1px solid #cdd7e6;border-radius:7px;padding:9px 10px;font:inherit;font-size:13px;line-height:1.5;color:#293d59;background:#fff}
+.plan-dialog-input:focus,.plan-dialog-textarea:focus{border-color:#5c7bc7}.plan-dialog-textarea{resize:vertical;min-height:72px}.plan-dialog-input::placeholder,.plan-dialog-textarea::placeholder{color:#69788c}
+.plan-grade-picks{display:flex;gap:8px;margin:0 0 8px}.plan-grade-picks button{border:1px solid #ccd8ec;border-radius:6px;font-size:12px;padding:7px 18px;background:#f4f7fd;color:#3558ab;min-height:34px}.plan-grade-picks button:hover{background:#e6edfa}
+.plan-dialog-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;border-top:1px solid #e7edf4;padding-top:16px}.plan-action-group{display:flex;gap:8px}
+.plan-cancel,.plan-save,.plan-delete{font:inherit;font-size:13px;min-height:40px;border-radius:7px;padding:9px 14px}.plan-cancel{background:#eef2f7;color:#455873}.plan-save{background:#3f64cd;color:white;font-weight:600}.plan-save:hover:not(:disabled){background:#3153b3}.plan-delete{color:#ab3b4e;padding-left:0}.plan-save.danger{background:#b44354}
+.plan-dialog-intro,.plan-form-hint{font-size:12px;line-height:1.8;color:#64748b;margin:10px 0}.plan-operation-preview{margin:18px 0 8px;padding:13px 15px;background:#f2f5fb;border-radius:8px;font-size:13px;color:#405574;line-height:1.8}
+@media(max-width:1399px){.plan-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.plan-day{min-height:240px}}
+@media(max-width:1000px){.plan-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.brand{width:100%}.class-nav{flex:1}.plan-page{padding:20px}}
+@media(max-width:760px){header.topbar{position:static;padding:14px 16px;gap:12px}.brand{flex-wrap:wrap}.top-acts{flex-wrap:wrap}.class-nav{flex-wrap:wrap}main,.view-bar{padding-left:12px;padding-right:12px}.view-bar{gap:0;padding-top:14px}.view-tab{padding:11px 13px;font-size:13px}.view-tab small{display:none}.plan-page{padding:16px}.plan-heading{gap:12px;margin-bottom:16px}.plan-heading h2{font-size:22px}.plan-controls{width:100%}.plan-week-select{flex:1;max-width:none}.plan-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.plan-filter{padding:8px 10px}.plan-footer{flex-direction:column}.plan-day-actions button{min-height:40px}.dialog[data-plan-dialog]{padding:20px}.plan-undo{min-height:36px}}
+@media(max-width:480px){.plan-grid{grid-template-columns:1fr}.plan-day{min-height:0;padding:14px}.plan-lessons:has(.plan-lesson){display:grid;grid-template-columns:1fr}.plan-day-actions{justify-content:flex-end;gap:18px}.plan-empty{padding:12px 8px 18px}.plan-lesson{padding:13px}.plan-line{font-size:13px}.plan-grade-filter{width:100%;justify-content:space-between}.plan-toolbar{gap:10px}.plan-undo{margin-left:auto}.plan-form-row{gap:10px}.plan-dialog-actions{gap:6px}.plan-cancel,.plan-save,.plan-delete{padding:9px 10px}.brand{font-size:15px}.cls-btn{padding:6px 10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+.embedded-teaching{
+  --bg:#f6f9f7;--bg2:#f6f9f7;--card:#fff;--line:#dce7e0;
+  --line-soft:#e8eee9;--line-strong:#c9d9cf;--txt:#18352b;
+  --muted:#577064;--faint:#798d80;--pri:#245c47;--pri-d:#184534;
+  --pri-bg:#edf5f0;--pri-bd:#c8ddd0;
+}
+.embedded-teaching body{background:var(--bg)}
+.embedded-teaching .topbar{height:auto;min-height:58px;padding:9px 16px;gap:12px;flex-wrap:wrap;background:#f6f9f7}
+.embedded-teaching .brand{display:none}
+.embedded-teaching .top-acts{flex-wrap:wrap}
+.embedded-teaching .class-nav{min-width:min(100%,300px);flex-wrap:wrap}
+.embedded-teaching .cls-btn.on{background:#e4f0e9;color:#184534;border-color:#a5c5b2}
+.embedded-teaching .view-bar{display:none}
+.embedded-teaching main{padding:14px 16px 16px}
+.embedded-teaching .plan-page,.embedded-teaching .chapter-page{background:#fff;border-color:var(--line);margin-top:0}
+.embedded-teaching .plan-heading h2,.embedded-teaching .chapter-heading h2,.embedded-teaching .plan-day-name{color:var(--txt)}
+.embedded-teaching .plan-btn,.embedded-teaching .plan-add{color:#245c47;border-color:#bed5c8}
+.embedded-teaching .plan-btn:hover:not(:disabled),.embedded-teaching .plan-add:hover{background:#e8f2ec}
+.embedded-teaching .chapter-primary,.embedded-teaching .plan-save:not(.danger){background:#245c47;color:#fff}
+.embedded-teaching .chapter-primary:hover,.embedded-teaching .plan-save:not(.danger):hover{background:#184534}
+.embedded-teaching :is(button,input,select,textarea):focus-visible{outline:2px solid #307252;outline-offset:3px}
+
+/* Weekly teaching plan */
+.class-nav[hidden] { display: none; }
+.plan-page {
+  --plan-ink: #18362b;
+  --plan-muted: #587067;
+  --plan-line: #dbe7df;
+  --plan-subtle: #f4f8f5;
+  min-width: 0;
+  border-radius: 13px;
+  color: var(--plan-ink);
+}
+.plan-page .ig1 {
+  --plan-group-ink: #205443;
+  --plan-group-bg: #e5f3eb;
+  --plan-group-line: #9ac9b2;
+}
+.plan-page .igb {
+  --plan-group-ink: #244b75;
+  --plan-group-bg: #e9f1fb;
+  --plan-group-line: #9ebbdc;
+}
+.plan-page .ig3 {
+  --plan-group-ink: #654b23;
+  --plan-group-bg: #f9efd9;
+  --plan-group-line: #d9be87;
+}
+.plan-page .pending {
+  --plan-group-ink: #505e57;
+  --plan-group-bg: #eef2ef;
+  --plan-group-line: #c5d0c9;
+}
+.plan-page .plan-heading h2,
+.plan-page .plan-day-name { color: var(--plan-ink); }
+.plan-page .plan-heading p,
+.plan-page .plan-guidance,
+.plan-page .plan-day-count,
+.plan-page .plan-footer { color: var(--plan-muted); }
+.plan-page #newPlanWeek {
+  background: #245c47;
+  border-color: #245c47;
+  color: white;
+}
+.plan-page #newPlanWeek:hover { background: #184534; }
+.plan-page .plan-toolbar { border-color: var(--plan-line); }
+.plan-page .plan-grade-filter {
+  display: flex;
+  align-items: stretch;
+  gap: 5px;
+  padding: 0;
+  background: transparent;
+}
+.plan-page .plan-filter {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  font-weight: 700;
+  color: var(--plan-group-ink, var(--plan-ink));
+  background-color: var(--plan-group-bg, #fff);
+  border: 1px solid var(--plan-group-line, var(--plan-line));
+}
+.plan-page .plan-filter em { margin: 0; white-space: nowrap; }
+.plan-page .plan-filter:hover { border-color: currentColor; }
+.plan-page .plan-filter.active {
+  color: var(--plan-group-ink, var(--plan-ink));
+  background-color: var(--plan-group-bg, var(--plan-subtle));
+  border-color: currentColor;
+  box-shadow: inset 0 -2px currentColor;
+}
+.plan-page .plan-timetable-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border: 1px solid var(--plan-line);
+  border-radius: 10px;
+  background: #fff;
+}
+.plan-page .plan-timetable {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 438px;
+  border-spacing: 0;
+  color: var(--plan-ink);
+  font-size: 12px;
+}
+.plan-page .plan-timetable .plan-period-col { width: 56px; }
+.plan-page .plan-timetable caption {
+  padding: 11px 12px;
+  background: #fff;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+}
+.plan-page .plan-timetable caption span {
+  margin-inline-start: 8px;
+  color: var(--plan-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+.plan-page .plan-timetable th,
+.plan-page .plan-timetable td {
+  padding: 3px;
+  border-right: 1px solid #e6eee8;
+  border-bottom: 1px solid #e6eee8;
+  text-align: center;
+  vertical-align: middle;
+}
+.plan-page .plan-timetable :is(th,td):last-child { border-right: 0; }
+.plan-page .plan-timetable tbody tr:last-child > * { border-bottom: 0; }
+.plan-page .plan-timetable thead th {
+  padding: 9px 3px;
+  white-space: nowrap;
+  background: #eef5f0;
+  font-weight: 700;
+}
+.plan-page .plan-timetable thead th small {
+  display: block;
+  line-height: 1.5;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--plan-muted);
+}
+.plan-page .plan-timetable th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.plan-page .plan-timetable .plan-period {
+  padding-inline: 2px;
+  background: var(--plan-subtle);
+  font-weight: 600;
+}
+.plan-page .plan-timetable .plan-session {
+  display: block;
+  padding-top: 1px;
+  color: var(--plan-muted);
+  font-size: 10px;
+}
+.plan-page .plan-period-number { white-space: nowrap; }
+.plan-page .plan-pm-start > * { border-top: 2px solid #c6d8cc; }
+.plan-page .plan-timetable tr > :nth-child(n + 7) { background-color: #fafbf8; }
+.plan-page .plan-timetable thead tr > :nth-child(n + 7) { background-color: #f0f4ea; }
+.plan-page .plan-slot {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  align-content: center;
+  justify-items: center;
+  gap: 1px;
+  padding: 4px 2px;
+  font: inherit;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--plan-muted);
+}
+.plan-page .plan-slot:focus-visible { outline-offset: -2px; }
+.plan-page .plan-slot-empty:hover {
+  color: var(--plan-ink);
+  background: #edf5ef;
+  border-color: #a7c9b4;
+}
+.plan-page .plan-slot-filled {
+  color: var(--plan-group-ink, var(--plan-ink));
+  background: var(--plan-group-bg, var(--plan-subtle));
+  border-color: var(--plan-group-line, var(--plan-line));
+}
+.plan-page .plan-slot-filled:hover { border-color: currentColor; }
+.plan-page .plan-slot-group { font-weight: 750; }
+.plan-page .plan-slot-title {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.plan-page .plan-pending-panel {
+  margin-top: 14px;
+  border: 1px solid var(--plan-line);
+  border-radius: 10px;
+  background: var(--plan-subtle);
+}
+.plan-page .plan-pending-panel > summary {
+  min-height: 38px;
+  padding: 9px 12px;
+  cursor: pointer;
+  color: var(--plan-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+.plan-page .plan-pending-panel > :not(summary) { margin-inline: 12px; }
+.plan-page .plan-pending-panel > p {
+  margin-bottom: 12px;
+  color: var(--plan-muted);
+  font-size: 12px;
+}
+.plan-page .plan-pending-panel summary > span {
+  color: var(--plan-muted);
+  margin-inline-start: 6px;
+  font-weight: 500;
+}
+.plan-page .plan-pending-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 178px), 1fr));
+  gap: 10px;
+  padding-bottom: 12px;
+}
+.plan-page .plan-pending-day {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--plan-line);
+  border-radius: 8px;
+  background: #fff;
+}
+.plan-page .plan-pending-day h3 { margin: 0 0 6px; font-size: 13px; }
+.plan-page .plan-pending-hw { color: var(--plan-muted); overflow-wrap: anywhere; }
+.plan-page .plan-pending-hw p,
+.dialog[data-plan-dialog] #planAssignHomework .plan-operation-preview { white-space: pre-wrap; }
+.dialog[data-plan-dialog] .plan-hw-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  border: 1px solid #dce7e0;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.dialog[data-plan-dialog] .plan-hw-groups input { accent-color: #245c47; }
+.plan-page .plan-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+}
+.plan-page .plan-day { min-height: 0; border-color: var(--plan-line); background: #f8faf8; }
+.plan-page .plan-day.weekend { background: #fafbf6; }
+.plan-page .plan-lesson {
+  border-color: var(--plan-group-line, var(--plan-line));
+}
+.plan-page .plan-lesson:hover {
+  border-color: var(--plan-group-ink, var(--plan-muted));
+  background: var(--plan-group-bg, var(--plan-subtle));
+}
+.plan-page .plan-lesson .grade {
+  color: var(--plan-group-ink, var(--plan-ink));
+  background: var(--plan-group-bg, var(--plan-subtle));
+}
+.plan-page .plan-homework h4,
+.plan-page .plan-homework-label { color: var(--plan-ink); }
+.plan-page .plan-homework-input {
+  min-height: 74px;
+  color: var(--plan-ink);
+  border-color: var(--plan-line);
+}
+.plan-page .plan-homework-input:focus { border-color: #559475; }
+@media (max-width: 620px) {
+  .plan-page { padding: 13px; }
+  .plan-page .plan-filter { padding-inline: 7px; min-height: 35px; }
+  .plan-page .plan-timetable .plan-period-col { width: 61px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">数学走班 · 教学工作台<small id="saveInfo"></small></div>
+  <div class="class-nav" id="classNav"></div>
+  <div class="top-acts">
+    <button class="mini-btn" id="btnExport">导出备份</button>
+    <button class="mini-btn" id="btnImport">导入备份</button>
+    <button class="mini-btn" id="btnHelp">使用说明</button>
+    <input type="file" id="fileImport" accept=".json,application/json" style="display:none">
+  </div>
+</header>
+
+<div class="view-bar" id="viewBar"></div>
+<main id="main"></main>
+
+<div id="toast"></div>
+<div class="menu-pop" id="menuPop"></div>
+
+<div class="mask" id="mask">
+  <div class="dialog" id="dialogBox"></div>
+</div>
+
+<script>
+'use strict';
+/* =========================================================
+   数学走班教学工作台
+   数据说明：
+   - classes[ID].students : [{id,name,tag,note}]
+   - classes[ID].seat     : {rows, cols, locked, grid: string[][]}
+   - classes[ID].hw       : {weeks:[{id,label}], marks:{weekId:{stuId:{s:'',q:''}}}}
+   s: done/miss/late/leave ; q: high/low
+   ========================================================= */
+
+const TEACHING_CLASSES = Object.freeze({ IGB: '初三', IG1: '初一', IG3: '初三' });
+const TEACHING_VIEWS = new Set(['plan','seat','hw']);
+const embeddedTeaching = window.parent !== window;
+const requestedTeachingView = new URLSearchParams(location.search).get('view');
+document.documentElement.classList.toggle('embedded-teaching', embeddedTeaching);
+
+/* ---------- 行政班配色 ----------
+   IGB1=绿 IGB2=红 IGB3=蓝（用户指定）；IG1.x 用可区分色板 */
+const CLASS_COLORS = {
+  '3.1': {c:'#2161b0', bg:'#e3effc', bd:'#a9c9ef', tx:'#235a9c'},
+  '3.2': {c:'#0f9d5c', bg:'#e5f7ee', bd:'#8fd6b2', tx:'#0a7a47'},
+  '3.3': {c:'#b16a0b', bg:'#fff2d8', bd:'#efd29a', tx:'#875300'},
+  'IGB1': {c:'#0f9d5c', bg:'#e5f7ee', bd:'#8fd6b2', tx:'#0a7a47'},
+  'IGB2': {c:'#e0454f', bg:'#fdecee', bd:'#f2aeb4', tx:'#b7333c'},
+  'IGB3': {c:'#2e6fc0', bg:'#e3effc', bd:'#a9c9ef', tx:'#235a9c'},
+  'IG1.1': {c:'#7c5cd6', bg:'#f0ebfc', bd:'#c9b8ef', tx:'#5f45ab'},
+  'IG1.2': {c:'#d5850a', bg:'#fcf2dd', bd:'#f0d49a', tx:'#a86a05'},
+  'IG1.3': {c:'#0e9aa7', bg:'#e0f6f8', bd:'#9ed8de', tx:'#0a7a85'},
+  'IG1.4': {c:'#5b6b88', bg:'#edf0f6', bd:'#c3ccdd', tx:'#47546e'},
+  'IG1.5': {c:'#d5399b', bg:'#fce9f4', bd:'#efaeda', tx:'#ab2c7c'},
+  'IG1.6': {c:'#8a6d3b', bg:'#f7f0e4', bd:'#ddc9a6', tx:'#6e5630'}
+};
+function classColor(tag){
+  return Object.hasOwn(CLASS_COLORS,tag) ? CLASS_COLORS[tag] : null;
+}
+/* 成绩徽章（受全局成绩锁控制；分数分色：≥70绿 50-69橙 <50红 缺考灰） */
+function scoreBadge(st){
+  if(!S || S.ui.scoreShown===false) return '';
+  if(st.score===undefined || st.score===null || String(st.score).trim()==='') return '';
+  const v = String(st.score).trim();
+  const n = parseFloat(v);
+  let col='#8794a8', bg='#eef1f6';
+  if(!isNaN(n)){
+    if(n>=70){ col='#0a7a47'; bg='#e5f7ee'; }
+    else if(n>=50){ col='#b26a08'; bg='#fcf2dd'; }
+    else { col='#b7333c'; bg='#fdecee'; }
+  }
+  return '<span class="scb" style="color:'+col+';background:'+bg+'" title="分班考试成绩">'+escapeHtml(v)+'</span>';
+}
+
+/* ---------- 符号表 ---------- */
+const MAIN = {
+  done : {sym:'✓', label:'已交'},
+  miss : {sym:'✗', label:'未交'},
+  late : {sym:'补', label:'需补交'},
+  leave: {sym:'假', label:'请假'}
+};
+const MAIN_ORDER = ['','done','miss','late','leave'];
+
+/* ---------- 存储 ---------- */
+const LS_KEY = 'math_walk_workbench_2026';
+let storeOK = true;
+function loadLS(){
+  try{ const raw = localStorage.getItem(LS_KEY); return raw ? prepareTeachingBackup(JSON.parse(raw)) : null; }
+  catch(e){ storeOK=false; return null; }
+}
+function saveLS(){
+  if(!storeOK) return;
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }
+  catch(e){ storeOK=false; showToast('浏览器存储不可用，请用「导出备份」保管数据'); }
+}
+
+/* ---------- 生成初始数据 ---------- */
+function makeDays(weekId){
+  return [
+    {id: weekId+'d1', label:'周一'}, {id: weekId+'d2', label:'周二'},
+    {id: weekId+'d3', label:'周三'}, {id: weekId+'d4', label:'周四'},
+    {id: weekId+'d5', label:'周五'}
+  ];
+}
+function buildClass(id){
+  const cols = 5;
+  return {
+    id, label:id, level:TEACHING_CLASSES[id],
+    students:[], seq:0,
+    seat:{ rows:1, cols, locked:false, grid:[Array(cols).fill('')] },
+    hw:{ weeks:[{id:'w1', label:'第1周', days:makeDays('w1')}], marks:{} }
+  };
+}
+function seedData(){
+  const s = { version:2, ui:{ active:'IGB', view:'plan', scoreShown:false }, classes:{} };
+  for (const id of Object.keys(TEACHING_CLASSES)) s.classes[id] = buildClass(id);
+  return s;
+}
+
+/* ---------- 教学计划：全站独立数据，不修改 classes ---------- */
+const PLAN_DAY_LABELS = ['周一','周二','周三','周四','周五','周六','周日'];
+const PLAN_GROUPS = ['IG1','IGB','IG3'];
+const PLAN_PERIODS = Array.from({length:9},(_,index) => {
+  const morning = index < 5;
+  const number = morning ? index + 1 : index - 4;
+  const session = morning ? '上午' : '下午';
+  return {number,session,label:`${session}第 ${number} 节`};
+});
+
+function planGroup(lesson) {
+  if (PLAN_GROUPS.includes(lesson.group) || lesson.group === 'pending') return lesson.group;
+  const grade = String(lesson.grade || '');
+  const code = grade.match(/(?:^|\b)(IG1|IGB|IG3)(?![A-Z0-9])/i);
+  return code ? code[1].toUpperCase() : grade.includes('初一') ? 'IG1' : 'pending';
+}
+
+function planSlotLabel(slot) {
+  return PLAN_PERIODS[slot - 1]?.label || '待定节次';
+}
+
+function planLessonName(lesson) {
+  return lesson.group === 'pending' ? `${lesson.grade || '旧计划'} · 待分班` : lesson.group;
+}
+
+function emptyPlanHomework() {
+  return {IG1:'', IGB:'', IG3:'', g9:'', other:''};
+}
+
+function mergePlanHomework(original, addition) {
+  if (!addition || original.trim() === addition.trim()) return original;
+  return original ? original + '\n' + addition : addition;
+}
+
+function ensurePlanDayHomework(day) {
+  const homework = emptyPlanHomework(), previous = day.homework;
+  if (typeof previous === 'string') homework.other = previous;
+  else if (previous && typeof previous === 'object') {
+    for (const key of Object.keys(homework)) homework[key] = String(previous[key] ?? '');
+    homework.IG1 = mergePlanHomework(homework.IG1,String(previous.g7 ?? ''));
+  }
+  const migrated = new Set();
+  for (const lesson of day.lessons) {
+    if (!lesson.homework) continue;
+    const key = lesson.group !== 'pending' ? lesson.group : lesson.grade.includes('初三') ? 'g9' : 'other';
+    const text = String(lesson.homework);
+    const assignment = key + '\0' + text.trim();
+    if (!migrated.has(assignment)) homework[key] = mergePlanHomework(homework[key],text);
+    migrated.add(assignment);
+    delete lesson.homework;
+  }
+  day.homework = homework;
+  return homework;
+}
+
+function normalizePlanDay(day, index) {
+  day.label = PLAN_DAY_LABELS[index];
+  const used = new Set();
+  day.lessons = (Array.isArray(day.lessons) ? day.lessons : []).map(lesson => {
+    const slot = Number(lesson.slot);
+    const group = planGroup(lesson);
+    const available = Number.isInteger(slot) && slot >= 1 && slot <= PLAN_PERIODS.length && !used.has(slot);
+    if (available && group !== 'pending') used.add(slot);
+    return {...lesson, grade:String(lesson.grade || ''), group, slot:available && group !== 'pending' ? slot : null,
+      content:String(lesson.content ?? ''), note:String(lesson.note ?? '')};
+  });
+  ensurePlanDayHomework(day);
+  return day;
+}
+
+function makePlanWeek(number) {
+  return {id:'plan_w'+number,label:'第'+number+'周',
+    days:PLAN_DAY_LABELS.map(label => ({label,lessons:[],homework:emptyPlanHomework()}))};
+}
+
+function normalizePlan(s) {
+  s.plan ??= {weekSeq:1,activeWeekId:'plan_w1',weeks:[makePlanWeek(1)]};
+  const plan = s.plan;
+  if (!Array.isArray(plan.weeks) || !plan.weeks.length) plan.weeks = [makePlanWeek(1)];
+  plan.weekSeq = Math.max(Number(plan.weekSeq)||0,plan.weeks.length);
+  plan.weeks.forEach((week,index) => {
+    week.id ||= 'plan_w'+(index+1);
+    week.label = String(week.label || ('第'+(index+1)+'周'));
+    week.days = PLAN_DAY_LABELS.map((_,i) => normalizePlanDay(week.days?.[i] || {},i));
+  });
+  for (const change of plan.history || []) {
+    if (Array.isArray(change.days) && change.days.length === PLAN_DAY_LABELS.length) change.days.forEach(normalizePlanDay);
+  }
+  if (!plan.weeks.some(week => week.id === plan.activeWeekId)) plan.activeWeekId = plan.weeks[0].id;
+}
+
+function activePlanWeek() {
+  return S.plan.weeks.find(week => week.id === S.plan.activeWeekId) || S.plan.weeks[0];
+}
+
+function createPlanWeek(plan, mode='schedule') {
+  const source = plan.weeks.find(week => week.id === plan.activeWeekId) || plan.weeks[0];
+  let number = Number(plan.weekSeq) || plan.weeks.length;
+  do { number++; } while (plan.weeks.some(week => week.id === 'plan_w'+number));
+  plan.weekSeq = number;
+  const week = makePlanWeek(number);
+  if (mode === 'full' && source) week.days = structuredClone(source.days);
+  if (mode === 'schedule' && source) {
+    source.days.forEach((day,index) => {
+      week.days[index].lessons = day.lessons.map(({grade,group,slot}) => ({grade,group,slot,content:'',note:''}));
+    });
+  }
+  plan.weeks.push(week);
+  plan.activeWeekId = week.id;
+  return week;
+}
+
+function currentPlanFilter() {
+  return PLAN_GROUPS.includes(S.ui.planGroupFilter) ? S.ui.planGroupFilter : 'all';
+}
+
+function rememberPlanChange(label) {
+  const week = activePlanWeek();
+  if (!Array.isArray(S.plan.history)) S.plan.history = [];
+  S.plan.history.push({weekId:week.id,label,days:structuredClone(week.days)});
+  S.plan.history = S.plan.history.slice(-20);
+}
+
+function lastPlanChangeIndex() {
+  const history = S.plan.history || [];
+  return history.findLastIndex(change => change.weekId === S.plan.activeWeekId && change.days?.length === 7);
+}
+
+function restorePlanChange() {
+  const index = lastPlanChangeIndex();
+  if (index < 0) return false;
+  const [change] = S.plan.history.splice(index,1);
+  activePlanWeek().days = structuredClone(change.days);
+  return true;
+}
+
+function planGroupClass(group) {
+  return group === 'all' ? 'all' : group.toLowerCase();
+}
+
+function planOverview(week, counts) {
+  const rows = PLAN_PERIODS.map((period,index) => {
+    const slot = index + 1;
+    const starts = index === 0 || index === 5;
+    const cells = week.days.map((day,dayIndex) => {
+      const lessonIndex = day.lessons.findIndex(lesson => lesson.slot === slot);
+      if (lessonIndex < 0) return `<td><button type="button" class="plan-slot plan-slot-empty" data-plan-edit="${dayIndex}" data-plan-lesson="-1" data-plan-slot="${slot}" aria-label="安排${day.label}${period.label}">＋</button></td>`;
+      const lesson = day.lessons[lessonIndex];
+      const title = lesson.content || '填写教学内容';
+      return `<td><button type="button" class="plan-slot plan-slot-filled ${planGroupClass(lesson.group)}" data-plan-edit="${dayIndex}" data-plan-lesson="${lessonIndex}" aria-label="编辑${day.label}${period.label} ${lesson.group}" title="${escapeHtml(title)}"><strong class="plan-slot-group">${lesson.group}</strong><span class="plan-slot-title">${escapeHtml(title)}</span></button></td>`;
+    }).join('');
+    return `<tr${starts ? ` class="${index === 0 ? 'plan-am-start' : 'plan-pm-start'}"` : ''}><th class="plan-period" scope="row" aria-label="${period.label}">${starts ? `<span class="plan-session">${period.session}</span>` : ''}<span class="plan-period-number">第 ${period.number} 节</span></th>${cells}</tr>`;
+  }).join('');
+  const days = week.days.map(day => `<th scope="col">${day.label}<small>${day.lessons.filter(lesson => lesson.slot).length} 节</small></th>`).join('');
+  return `<p class="plan-guidance">点击空节次排课，点击已有课程可编辑内容或调课。选班级填写每天的作业。</p>
+    <div class="plan-timetable-wrap" tabindex="0" aria-label="七天课表，可横向滚动">
+      <table class="plan-timetable"><caption>本周课时总览 <span>已排 ${counts.all} 节${counts.pending ? ` · 待安排 ${counts.pending} 节` : ''}</span></caption>
+        <colgroup><col class="plan-period-col"><col span="7"></colgroup>
+        <thead><tr><th scope="col">节次</th>${days}</tr></thead><tbody>${rows}</tbody></table>
+    </div>${planPending(week)}`;
+}
+
+function planCourseButton(day,index,lesson) {
+  const label = planSlotLabel(lesson.slot);
+  return `<button type="button" class="plan-lesson ${planGroupClass(lesson.group)}" data-plan-edit="${day}" data-plan-lesson="${index}" aria-label="编辑${PLAN_DAY_LABELS[day]}${label} ${escapeHtml(planLessonName(lesson))}">
+    <span class="plan-lesson-top"><span class="grade">${escapeHtml(planLessonName(lesson))}</span><span class="plan-order">${label}</span></span>
+    <span class="plan-line">${lesson.content ? escapeHtml(lesson.content) : '<span class="blank">填写教学内容</span>'}</span>
+    ${lesson.note ? `<span class="plan-note">${escapeHtml(lesson.note)}</span>` : ''}
+  </button>`;
+}
+
+function planPending(week) {
+  let count = 0, homeworkCount = 0;
+  const days = week.days.map((day,dayIndex) => {
+    const lessons = day.lessons.map((lesson,index) => {
+      if (lesson.slot) return '';
+      count++;
+      return planCourseButton(dayIndex,index,lesson);
+    }).join('');
+    const homework = [['g9','初三作业 · 待分班'],['other','其他旧作业 · 待分班']].map(([key,label]) => {
+      if (!day.homework[key]) return '';
+      homeworkCount++;
+      return `<div class="plan-pending-hw"><strong>${label}</strong><p>${escapeHtml(day.homework[key])}</p><button class="plan-btn" type="button" data-plan-place-hw="${dayIndex}" data-plan-old-hw="${key}">分配作业</button></div>`;
+    }).join('');
+    return lessons || homework ? `<section class="plan-pending-day"><h3>${day.label}</h3>${lessons}${homework}</section>` : '';
+  }).join('');
+  return count || homeworkCount ? `<details class="plan-pending-panel" open>
+    <summary>待安排的旧计划 <span>${count ? `${count} 节课` : ''}${count && homeworkCount ? ' · ' : ''}${homeworkCount ? `${homeworkCount} 份作业` : ''}</span></summary>
+    <p>旧计划里的课程已保留。点击课程补选节次；标为「待分班」的初三记录还需选定班级。</p>
+    <div class="plan-pending-grid">${days}</div>
+  </details>` : '';
+}
+
+function planClassDetail(week, group) {
+  return `<p class="plan-guidance">点击课程填写节次和教学内容。当天作业按班级保存。</p><div class="plan-grid">
+    ${week.days.map((day,dayIndex) => {
+      const courses = day.lessons.map((lesson,index) => ({lesson,index})).filter(item => item.lesson.group === group)
+        .sort((a,b) => (a.lesson.slot || 10) - (b.lesson.slot || 10));
+      const pending = courses.filter(({lesson}) => !lesson.slot).length;
+      const homeworkId = `planHw-${dayIndex}-${group}`;
+      return `<section class="plan-day${dayIndex >= 5 ? ' weekend' : ''}" aria-label="${day.label} ${group} 计划">
+        <div class="plan-day-head"><h3 class="plan-day-name">${day.label}</h3><span class="plan-day-count">${courses.length - pending} 节${pending ? ` · ${pending} 节待排` : ''}</span></div>
+        ${courses.length ? `<div class="plan-day-actions"><button type="button" data-plan-transfer="${dayIndex}">调课 / 复制</button><button type="button" class="plan-clear" data-plan-clear="${dayIndex}">清空当天课程</button></div>` : ''}
+        <div class="plan-lessons">${courses.map(({lesson,index}) => planCourseButton(dayIndex,index,lesson)).join('') || '<p class="plan-empty">当天暂无课程</p>'}</div>
+        <button type="button" class="plan-add" data-plan-edit="${dayIndex}" data-plan-lesson="-1" aria-label="为${group}添加${day.label}课程">＋ 添加一节课</button>
+        <div class="plan-homework"><label class="plan-homework-label ${planGroupClass(group)}" for="${homeworkId}">当天作业</label>
+          <textarea id="${homeworkId}" class="plan-homework-input" rows="3" data-plan-homework="${dayIndex}" aria-label="${day.label} ${group} 当天作业" placeholder="填写要布置的作业…">${escapeHtml(day.homework[group])}</textarea>
+        </div>
+      </section>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderPlan() {
+  const week = activePlanWeek(), filter = currentPlanFilter(), undoIndex = lastPlanChangeIndex();
+  const counts = {all:0, IG1:0, IGB:0, IG3:0, pending:0};
+  for (const day of week.days) for (const lesson of day.lessons) {
+    if (!lesson.slot) {
+      counts.pending++;
+      continue;
+    }
+    counts[lesson.group]++;
+    counts.all++;
+  }
+  const filters = ['all', ...PLAN_GROUPS].map(group =>
+    `<button type="button" class="plan-filter ${planGroupClass(group)}${filter === group ? ' active' : ''}" aria-pressed="${filter === group}" data-plan-filter="${group}">${group === 'all' ? '总览' : group}<em>${counts[group]} 节</em></button>`
+  ).join('');
+  document.getElementById('main').innerHTML = `<div class="plan-page">
+    <div class="plan-heading"><h2>${filter === 'all' ? '周课表' : `${filter} 教学计划`}</h2>
+      <div class="plan-controls"><select id="planWeekSelect" class="plan-week-select" aria-label="选择教学周">
+        ${S.plan.weeks.map(item => `<option value="${escapeHtml(item.id)}"${item.id === week.id ? ' selected' : ''}>${escapeHtml(item.label)}</option>`).join('')}
+      </select><button type="button" class="plan-btn" id="newPlanWeek">新建一周</button></div>
+    </div>
+    <div class="plan-toolbar">
+      <div class="plan-grade-filter" role="group" aria-label="选择总览或教学班">${filters}</div>
+      <button type="button" id="undoPlan" class="plan-btn plan-undo" ${undoIndex < 0 ? 'disabled' : ''} title="${undoIndex < 0 ? '本周暂无可撤销的调整' : escapeHtml(S.plan.history[undoIndex].label)}">撤销上次调整</button>
+    </div>
+    ${filter === 'all' ? planOverview(week,counts) : planClassDetail(week,filter)}
+    <p class="plan-footer">修改自动保存在本机。</p>
+  </div>`;
+  bindPlan();
+}
+
+let planDialogOpener = null;
+function openPlanDialog(title,body) {
+  planDialogOpener = document.activeElement;
+  const box = document.getElementById('dialogBox');
+  box.setAttribute('role','dialog');
+  box.setAttribute('aria-modal','true');
+  box.setAttribute('aria-labelledby','planDialogTitle');
+  box.dataset.planDialog = 'true';
+  box.innerHTML = `<h3 id="planDialogTitle">${escapeHtml(title)}</h3>${body}`;
+  document.getElementById('mask').classList.add('show');
+  box.querySelector('input,select,textarea,button')?.focus();
+  box.querySelectorAll('[data-plan-cancel]').forEach(button => button.onclick = closePlanDialog);
+}
+
+function closePlanDialog() {
+  document.getElementById('mask').classList.remove('show');
+  const box = document.getElementById('dialogBox');
+  delete box.dataset.planDialog;
+  ['role','aria-modal','aria-labelledby'].forEach(attribute => box.removeAttribute(attribute));
+  if (planDialogOpener?.isConnected) planDialogOpener.focus();
+}
+
+function finishPlanChange(message) {
+  closePlanDialog();
+  renderPlan();
+  saveAndFlash();
+  showToast(message);
+  document.getElementById('undoPlan').focus({preventScroll:true});
+}
+
+function planDialogActions(label, extra = '', danger = false) {
+  return `<div class="plan-dialog-actions">${extra || '<span></span>'}<div class="plan-action-group">
+    <button type="button" class="plan-cancel" data-plan-cancel>取消</button>
+    <button type="submit" class="plan-save${danger ? ' danger' : ''}">${label}</button>
+  </div></div>`;
+}
+
+function planDayOptions(current, exclude=-1) {
+  return PLAN_DAY_LABELS.map((name,index) =>
+    index === exclude ? '' : `<option value="${index}"${index === current ? ' selected' : ''}>${name}</option>`
+  ).join('');
+}
+
+function planGroupOptions(current) {
+  return PLAN_GROUPS.map(group =>
+    `<option value="${group}"${group === current ? ' selected' : ''}>${group} · ${TEACHING_CLASSES[group]}</option>`
+  ).join('');
+}
+
+function editPlanLesson(dayIndex,lessonIndex,initialSlot) {
+  const week = activePlanWeek(), filter = currentPlanFilter(), isNew = lessonIndex < 0;
+  const original = isNew ? {} : week.days[dayIndex].lessons[lessonIndex];
+  const preferredGroup = original.group || (filter === 'all' ? '' : filter);
+  const preferredSlot = original.slot || initialSlot || '';
+  const extra = isNew ? '' : '<button type="button" class="plan-delete" id="deletePlanLesson">删除本节课</button>';
+  openPlanDialog(isNew ? '安排课程' : '编辑课程',`<form id="planLessonForm">
+    <label class="plan-dialog-label" for="planGroup">教学班</label><select class="plan-dialog-input" id="planGroup" required>
+      <option value=""${PLAN_GROUPS.includes(preferredGroup) ? '' : ' selected'} disabled>请选择班级</option>${planGroupOptions(preferredGroup)}
+    </select>
+    <div class="plan-form-row"><div><label class="plan-dialog-label" for="planDay">上课星期</label>
+      <select class="plan-dialog-input" id="planDay">${planDayOptions(dayIndex)}</select></div>
+      <div><label class="plan-dialog-label" for="planSlot">上课节次</label><select class="plan-dialog-input" id="planSlot" required></select></div></div>
+    <label class="plan-dialog-label" for="planContent">教学内容</label><textarea class="plan-dialog-textarea" id="planContent" placeholder="例如：有理数加法法则">${escapeHtml(original.content || '')}</textarea>
+    <label class="plan-dialog-label" for="planNote">备注</label><input class="plan-dialog-input" id="planNote" value="${escapeHtml(original.note || '')}" placeholder="可留空">
+    ${planDialogActions(isNew ? '添加课程' : '保存调整',extra)}
+  </form>`);
+  const daySelect = document.getElementById('planDay'), slotSelect = document.getElementById('planSlot');
+  function showSlots(preferred) {
+    const occupied = new Map(week.days[Number(daySelect.value)].lessons.filter(lesson => lesson !== original && lesson.slot).map(lesson => [lesson.slot,lesson.group]));
+    const selected = preferred && !occupied.has(Number(preferred)) ? Number(preferred) : '';
+    slotSelect.innerHTML = `<option value=""${selected ? '' : ' selected'} disabled>请选择节次</option>` + PLAN_PERIODS.map((period,index) => {
+      const slot = index + 1;
+      const owner = occupied.get(slot);
+      return `<option value="${slot}"${slot === selected ? ' selected' : ''}${owner ? ' disabled' : ''}>${period.label}${owner ? `（${owner} 已安排）` : ''}</option>`;
+    }).join('');
+  }
+  showSlots(preferredSlot);
+  daySelect.onchange = () => showSlots(slotSelect.value || preferredSlot);
+  document.getElementById('planLessonForm').onsubmit = event => {
+    event.preventDefault();
+    const group = document.getElementById('planGroup').value;
+    const day = Number(daySelect.value), slot = Number(slotSelect.value);
+    if (!PLAN_GROUPS.includes(group) || !PLAN_PERIODS[slot - 1] ||
+      week.days[day].lessons.some(lesson => lesson !== original && lesson.slot === slot)) return;
+    const lesson = {...original,grade:TEACHING_CLASSES[group],group,slot,
+      content:document.getElementById('planContent').value.trim(),
+      note:document.getElementById('planNote').value.trim()};
+    rememberPlanChange(isNew ? '添加课程' : '修改课程');
+    if (!isNew) week.days[dayIndex].lessons.splice(lessonIndex,1);
+    week.days[day].lessons.push(lesson);
+    if (filter !== 'all' && filter !== group) S.ui.planGroupFilter = group;
+    finishPlanChange(`已保存${PLAN_DAY_LABELS[day]}${planSlotLabel(slot)}`);
+  };
+  const remove = document.getElementById('deletePlanLesson');
+  if (remove) remove.onclick = () => {
+    rememberPlanChange('删除课程');
+    week.days[dayIndex].lessons.splice(lessonIndex,1);
+    finishPlanChange('已删除本节课，可撤销');
+  };
+}
+
+function clearPlanDayDialog(dayIndex) {
+  const day = activePlanWeek().days[dayIndex], group = currentPlanFilter();
+  if (group === 'all') return;
+  const count = day.lessons.filter(lesson => lesson.group === group).length;
+  openPlanDialog('清空当天课程',`<form id="planClearForm">
+    <p class="plan-dialog-intro">将清空${day.label} ${group} 的 ${count} 节课。当天作业保留。</p>
+    ${planDialogActions('确认清空','',true)}
+  </form>`);
+  document.getElementById('planClearForm').onsubmit = event => {
+    event.preventDefault();
+    rememberPlanChange('清空'+day.label);
+    day.lessons = day.lessons.filter(lesson => lesson.group !== group);
+    finishPlanChange('已清空课程，可撤销');
+  };
+}
+
+function transferPlanDayDialog(dayIndex) {
+  const week = activePlanWeek(), group = currentPlanFilter();
+  const source = week.days[dayIndex], lessons = source.lessons.filter(lesson => lesson.group === group);
+  if (!lessons.length) return;
+  openPlanDialog('调课 / 复制',`<form id="planTransferForm">
+    <p class="plan-dialog-intro">${source.label} ${group} 共 ${lessons.length} 节。课程沿用原节次，当天作业留在原日。</p>
+    <label class="plan-dialog-label" for="planTransferMode">操作</label>
+    <select id="planTransferMode" class="plan-dialog-input"><option value="move">调课</option><option value="copy">复制课程</option></select>
+    <label class="plan-dialog-label" for="planTarget">目标星期</label>
+    <select id="planTarget" class="plan-dialog-input">${planDayOptions((dayIndex+1)%7,dayIndex)}</select>
+    <p id="planTransferPreview" class="plan-operation-preview" aria-live="polite"></p>
+    ${planDialogActions('确认调整')}
+  </form>`);
+  const form = document.getElementById('planTransferForm'), target = document.getElementById('planTarget');
+  const mode = document.getElementById('planTransferMode');
+  function preview() {
+    const day = week.days[Number(target.value)];
+    const conflicts = lessons.filter(lesson => lesson.slot && day.lessons.some(item => item.slot === lesson.slot));
+    document.getElementById('planTransferPreview').textContent = conflicts.length
+      ? `${day.label}的${conflicts.map(lesson => planSlotLabel(lesson.slot)).join('、')}已有课程，请另选日期或单独调整冲突的课程。`
+      : `可${mode.value === 'move' ? '移动' : '复制'}到${day.label}。`;
+    form.querySelector('[type="submit"]').disabled = conflicts.length > 0;
+    return !conflicts.length;
+  }
+  target.onchange = mode.onchange = preview;
+  preview();
+  form.onsubmit = event => {
+    event.preventDefault();
+    if (!preview()) return;
+    rememberPlanChange(mode.value === 'move' ? '整天调课' : '复制课程');
+    const day = week.days[Number(target.value)];
+    day.lessons.push(...structuredClone(lessons));
+    if (mode.value === 'move') source.lessons = source.lessons.filter(lesson => lesson.group !== group);
+    finishPlanChange(`已${mode.value === 'move' ? '调课' : '复制'}至${day.label}`);
+  };
+}
+
+function assignPlanHomework(dayIndex,key) {
+  const day = activePlanWeek().days[dayIndex];
+  if (!['g9','other'].includes(key) || !day.homework[key]) return;
+  openPlanDialog(`${day.label} · 分配作业`,`<form id="planAssignHomework">
+    <p class="plan-dialog-intro">旧作业会追加到所选班级当天的作业后。</p>
+    <div class="plan-operation-preview">${escapeHtml(day.homework[key])}</div>
+    <fieldset class="plan-hw-groups"><legend>分配给</legend>
+      ${(key === 'g9' ? ['IGB','IG3'] : PLAN_GROUPS).map(group => `<label><input name="groups" value="${group}" type="checkbox"> ${group}</label>`).join('')}
+    </fieldset>
+    ${planDialogActions('分配作业')}
+  </form>`);
+  const form = document.getElementById('planAssignHomework');
+  const groups = () => [...form.querySelectorAll('input:checked')].map(input => input.value);
+  const submit = form.querySelector('[type="submit"]');
+  submit.disabled = true;
+  form.onchange = () => {submit.disabled = !groups().length;};
+  form.onsubmit = event => {
+    event.preventDefault();
+    const selected = groups();
+    if (!selected.length) return;
+    rememberPlanChange('分配旧作业');
+    for (const group of selected) day.homework[group] = mergePlanHomework(day.homework[group],day.homework[key]);
+    day.homework[key] = '';
+    finishPlanChange('已分配作业，可撤销');
+  };
+}
+
+function newPlanWeekDialog() {
+  openPlanDialog('新建一周',`<form id="planNewWeekForm">
+    <label class="plan-dialog-label" for="planNewMode">新周安排</label>
+    <select id="planNewMode" class="plan-dialog-input">
+      <option value="schedule">沿用本周课表（仅班级与节次）</option>
+      <option value="full">复制本周完整计划</option>
+      <option value="blank">创建空白周</option>
+    </select>${planDialogActions('创建一周')}
+  </form>`);
+  document.getElementById('planNewWeekForm').onsubmit = event => {
+    event.preventDefault();
+    const week = createPlanWeek(S.plan,document.getElementById('planNewMode').value);
+    closePlanDialog();
+    renderPlan();
+    saveAndFlash();
+    showToast('已创建'+week.label);
+    document.getElementById('planWeekSelect').focus();
+  };
+}
+
+function bindPlan() {
+  const main = document.getElementById('main');
+  const week = activePlanWeek(), group = currentPlanFilter();
+  main.querySelectorAll('[data-plan-homework]').forEach(input => {
+    const day = week.days[Number(input.dataset.planHomework)];
+    let editing = false;
+    input.onblur = () => {editing = false;};
+    input.oninput = () => {
+      if (day.homework[group] === input.value) return;
+      if (!editing) {rememberPlanChange(`修改${day.label}当天作业`);editing = true;}
+      day.homework[group] = input.value;
+      saveAndFlash();
+      document.getElementById('undoPlan').disabled = false;
+    };
+  });
+  main.querySelectorAll('[data-plan-filter]').forEach(button => button.onclick = () => {
+    S.ui.planGroupFilter = button.dataset.planFilter;
+    renderPlan();saveAndFlash();
+    main.querySelector(`[data-plan-filter="${S.ui.planGroupFilter}"]`).focus();
+  });
+  document.getElementById('planWeekSelect').onchange = function () {
+    S.plan.activeWeekId = this.value;
+    renderPlan();saveAndFlash();
+    document.getElementById('planWeekSelect').focus();
+  };
+  document.getElementById('newPlanWeek').onclick = newPlanWeekDialog;
+  document.getElementById('undoPlan').onclick = () => {
+    if (!restorePlanChange()) return;
+    renderPlan();saveAndFlash();showToast('已撤销本周上次调整');
+    document.getElementById('planWeekSelect').focus();
+  };
+  main.querySelectorAll('[data-plan-edit]').forEach(button => button.onclick = () =>
+    editPlanLesson(Number(button.dataset.planEdit),Number(button.dataset.planLesson),Number(button.dataset.planSlot)));
+  main.querySelectorAll('[data-plan-clear]').forEach(button => button.onclick = () => clearPlanDayDialog(Number(button.dataset.planClear)));
+  main.querySelectorAll('[data-plan-transfer]').forEach(button => button.onclick = () => transferPlanDayDialog(Number(button.dataset.planTransfer)));
+  main.querySelectorAll('[data-plan-place-hw]').forEach(button => button.onclick = () =>
+    assignPlanHomework(Number(button.dataset.planPlaceHw),button.dataset.planOldHw));
+}
+
+let S = loadLS() || seedData();
+normalize(S);
+if (TEACHING_VIEWS.has(requestedTeachingView)) S.ui.view = requestedTeachingView;
+
+function backupRecord(value){
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function backupKey(value){
+  return typeof value === 'string' && /^[-_a-zA-Z0-9]{1,100}$/.test(value) && !Object.hasOwn(Object.prototype,value);
+}
+
+function validateDays(days){
+  if (days == null) return;
+  if (!Array.isArray(days) || days.length > 7) throw new Error('教学周日期格式无效');
+  days.forEach(day=>{
+    if (!backupRecord(day) || (day.lessons != null && (!Array.isArray(day.lessons) || !day.lessons.every(backupRecord)))) {
+      throw new Error('教学计划课程格式无效');
+    }
+  });
+}
+
+function prepareTeachingBackup(data, view = requestedTeachingView){
+  if (!backupRecord(data) || !backupRecord(data.classes) || !Object.keys(data.classes).length || (data.version != null && ![1,2].includes(data.version))) {
+    throw new Error('请选择数学走班工作台的 JSON 备份');
+  }
+  const next = JSON.parse(JSON.stringify(data));
+  for (const [id,c] of Object.entries(next.classes)) {
+    if (!Object.hasOwn(TEACHING_CLASSES,id) || !backupRecord(c) || !Array.isArray(c.students)) {
+      throw new Error('班级或学生名单格式无效');
+    }
+    if (c.students.some(st=>!backupRecord(st) || !backupKey(st.id) || typeof st.name !== 'string' || !st.name.trim()) || new Set(c.students.map(st=>st.id)).size !== c.students.length) {
+      throw new Error('学生姓名或编号无效，或存在重复编号');
+    }
+    const seat = c.seat;
+    if (seat != null && (!backupRecord(seat) || ['rows','cols'].some(key=>seat[key]!=null&&(!Number.isInteger(seat[key])||seat[key]<0||seat[key]>100)) || (seat.grid != null && (!Array.isArray(seat.grid) || !seat.grid.every(row=>Array.isArray(row)&&row.every(cell=>cell===''||backupKey(cell))))))) {
+      throw new Error('座位表格式无效');
+    }
+    const hw = c.hw;
+    if (hw != null && (!backupRecord(hw) || (hw.weeks != null && (!Array.isArray(hw.weeks) || !hw.weeks.every(week=>backupRecord(week)&&backupKey(week.id)&&(week.days==null||(Array.isArray(week.days)&&week.days.every(day=>backupRecord(day)&&backupKey(day.id))))))) || (hw.marks != null && !backupRecord(hw.marks)))) {
+      throw new Error('按天作业记录格式无效');
+    }
+    const chapter = c.chapterHW;
+    if (chapter != null && (!backupRecord(chapter) || (chapter.chapters != null && (!Array.isArray(chapter.chapters) || !chapter.chapters.every(ch=>backupRecord(ch)&&backupKey(ch.id)))) || (chapter.marks != null && (!backupRecord(chapter.marks) || !Object.values(chapter.marks).every(marks=>backupRecord(marks)&&Object.values(marks).every(grade=>['A','B','C',''].includes(grade))))))) {
+      throw new Error('章节作业或等级格式无效');
+    }
+    c.id = id;
+  }
+  if (next.plan != null) {
+    if (!backupRecord(next.plan) || (next.plan.weeks!=null&&(!Array.isArray(next.plan.weeks)||!next.plan.weeks.every(backupRecord))) || (next.plan.history!=null&&(!Array.isArray(next.plan.history)||!next.plan.history.every(backupRecord)))) {
+      throw new Error('教学计划格式无效');
+    }
+    for (const week of next.plan.weeks || []) validateDays(week.days);
+    for (const change of next.plan.history || []) {
+      validateDays(change.days);
+      change.days?.forEach((day,i)=>{day.label=PLAN_DAY_LABELS[i];day.lessons=day.lessons||[];});
+    }
+  }
+  next.ui = backupRecord(next.ui) ? next.ui : {};
+  if (TEACHING_VIEWS.has(view)) next.ui.view = view;
+  delete next._paint;
+  delete next._sel;
+  normalize(next);
+  return next;
+}
+
+function normalize(s){
+  for (const id of Object.keys(TEACHING_CLASSES)) if (!s.classes[id]) s.classes[id] = buildClass(id);
+  s.version = 2;
+  s.ui = s.ui || {};
+  if (!TEACHING_VIEWS.has(s.ui.view)) s.ui.view = 'plan';
+  if(s.ui.scoreShown===undefined) s.ui.scoreShown = false; // 成绩默认锁定隐藏
+  if(!Object.hasOwn(s.classes,s.ui.active)) s.ui.active = Object.keys(s.classes)[0];
+  Object.keys(s.classes).forEach(function(k){
+    const c = s.classes[k];
+    c.students = c.students || [];
+    c.label = c.label || k;
+    c.level = c.level || TEACHING_CLASSES[k];
+    c.seq = Number.isSafeInteger(c.seq) && c.seq >= 0 ? c.seq : c.students.length;
+    c.students.forEach(function(st){ if(st.score===undefined) st.score=''; });
+
+    c.seat = c.seat || {};
+    c.seat.locked = !!c.seat.locked;
+    c.seat.rows = Math.max(1, c.seat.rows||1);
+    c.seat.cols = Math.max(1, c.seat.cols||5);
+    c.hw = c.hw || {};
+    c.hw.weeks = (c.hw.weeks && c.hw.weeks.length)? c.hw.weeks : [{id:'w1',label:'第1周'}];
+    c.hw.marks = c.hw.marks || {};
+    /* ---- v1 → v2：每周展开为“周一~周五”5天；旧的周级记录迁移到周一 ---- */
+    c.hw.weeks.forEach(function(w){
+      if(!w.days || !w.days.length){
+        w.days = makeDays(w.id);
+        if(c.hw.marks[w.id]){
+          c.hw.marks[w.days[0].id] = c.hw.marks[w.id];
+          delete c.hw.marks[w.id];
+        }
+      }
+      /* ---- 补齐缺失的默认天（周一~周五，d1~d5 模式）----
+         旧数据每周只有周一~周四，这里自动补上周五；用户手动新增的天（w<id>x<数字>）不受影响 */
+      ['周一','周二','周三','周四','周五'].forEach(function(lbl, i){
+        const did = w.id + 'd' + (i+1);
+        if(!w.days.some(function(d){ return d.id===did; })){
+          w.days.push({id:did, label:lbl});
+        }
+      });
+      w.days.forEach(function(d){ if(!c.hw.marks[d.id]) c.hw.marks[d.id] = {}; });
+    });
+    normalizeChapterHW(c);
+    // 座位网格补齐
+    const g = c.seat.grid || [];
+    const grid = [];
+    for(let r=0;r<c.seat.rows;r++){
+      const row = [];
+      for(let col=0;col<c.seat.cols;col++){
+        const v = (g[r] && g[r][col] !== undefined) ? g[r][col] : '';
+        row.push(v);
+      }
+      grid.push(row);
+    }
+    c.seat.grid = grid;
+  });
+  normalizePlan(s);
+}
+
+/* ---------- 全局工具 ---------- */
+function cls(){ return S.classes[S.ui.active]; }
+function uid(clsObj, name){
+  let id;
+  do { id = clsObj.id + '_s' + (++clsObj.seq); }
+  while (clsObj.students.some(st=>st.id===id) || clsObj.seat.grid.some(row=>row.includes(id)));
+  return id;
+}
+
+let workbenchRoster = {};
+
+function isTeachingStudentArchived(c, student) {
+  if (!student) return false;
+  const group = Object.keys(S.classes).find(key => S.classes[key] === c);
+  const roster = workbenchRoster[group] || [];
+  const names = roster.filter(entry => entry.name === student.name.trim());
+  const numbers = student.schoolId ? names.filter(entry => entry.schoolId === String(student.schoolId)) : [];
+  if (numbers.length === 1) return numbers[0].archived === true;
+  return names.length === 1 && c.students.filter(entry => entry.name.trim() === student.name.trim()).length === 1 && names[0].archived === true;
+}
+
+function teachingVisibleStudents(c) {
+  return c.students.filter(student => !isTeachingStudentArchived(c, student));
+}
+
+function seatOccupant(c, id) {
+  const student = id && c.students.find(student => student.id === id);
+  return student && !isTeachingStudentArchived(c, student) ? student : null;
+}
+
+function syncTeachingRoster(roster, mergeExisting = false){
+  const result = {added:0, matched:0, ambiguous:0};
+  if (!backupRecord(roster)) return result;
+  for (const id of Object.keys(TEACHING_CLASSES)) {
+    const c = S.classes[id];
+    if (!Array.isArray(roster[id]) || (!mergeExisting && c.students.length)) continue;
+    const wasEmpty = c.students.length === 0;
+    for (const entry of roster[id]) {
+      if (!backupRecord(entry) || entry.archived === true || typeof entry.name !== 'string' || !entry.name.trim()) continue;
+      const name = entry.name.trim();
+      const tag = typeof entry.tag === 'string' ? entry.tag.trim() : '';
+      const schoolId = typeof entry.schoolId === 'string' ? entry.schoolId.trim() : '';
+      const byNumber = schoolId ? c.students.filter(st=>String(st.schoolId||'')===schoolId) : [];
+      const byName = c.students.filter(st=>st.name.trim()===name);
+      const matches = byNumber.length ? byNumber : byName;
+      if (matches.length > 1 || (matches.length === 1 && schoolId && matches[0].schoolId && String(matches[0].schoolId)!==schoolId)) {
+        result.ambiguous++;
+        continue;
+      }
+      if (matches.length === 1) {
+        const st = matches[0];
+        if (schoolId && !st.schoolId) st.schoolId = schoolId;
+        if (tag && !st.tag) st.tag = tag;
+        result.matched++;
+        continue;
+      }
+      c.students.push({id:uid(c),name,tag,schoolId,score:'',note:''});
+      result.added++;
+    }
+    if (wasEmpty && !c.seat.locked && !c.seat.grid.some(row=>row.some(Boolean))) {
+      const rows = Math.ceil(c.students.length / c.seat.cols);
+      if (rows > c.seat.rows) resizeGrid(c,rows,c.seat.cols);
+    }
+  }
+  return result;
+}
+function nameOf(clsObj, id){
+  const st = clsObj.students.find(function(x){ return x.id === id; });
+  return st ? st.name : '';
+}
+function seatKey(r,c){ return r + '_' + c; }
+function poolOf(clsObj){ // 未入座学生
+  const used = {};
+  clsObj.seat.grid.forEach(function(row){ row.forEach(function(v){ if(v) used[v]=1; }); });
+  return teachingVisibleStudents(clsObj).filter(function(st){ return !used[st.id]; });
+}
+var toastTimer = null;
+
+function showToast(t){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = t;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1800);
+}
+function saveAndFlash(){
+  S.updatedAt = Date.now();
+  saveLS();
+  const el = document.getElementById('saveInfo');
+  if(el){
+    const d = new Date();
+    const hh = ('0'+d.getHours()).slice(-2), mm=('0'+d.getMinutes()).slice(-2), ss=('0'+d.getSeconds()).slice(-2);
+    el.textContent = (storeOK? '· 已自动保存 ' : '· 存储不可用(需导出备份) ') + hh+':'+mm+':'+ss;
+  }
+}
+/* ---------- 学生头像 ---------- */
+const AV_COLORS = ['#4c6ef5','#0ca678','#f08c00','#e64980','#6741d9','#0b7285','#c92a2a','#2f9e44','#e8590c','#5f3dc4'];
+function avColor(name){
+  let h = 0; const s = String(name==null?'?':name);
+  for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) >>> 0;
+  return AV_COLORS[h % AV_COLORS.length];
+}
+function avatar(name){
+  const s = String(name==null?'?':name).trim();
+  const c0 = s.charAt(0) || '?';
+  return '<span class="av" style="background:'+avColor(name)+'">'+escapeHtml(c0)+'</span>';
+}
+
+function escapeHtml(t){
+  return String(t==null?'':t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ---------- 顶栏 / 视图按钮 ---------- */
+function renderTop(){
+  const nav = document.getElementById('classNav');
+  nav.hidden = S.ui.view === 'plan';
+  let html = '';
+  Object.keys(S.classes).forEach(function(k){
+    const c = S.classes[k];
+    const n = teachingVisibleStudents(c).length;
+    const on = S.ui.active === k ? 'on' : '';
+    html += '<button class="cls-btn '+on+'" data-act="switchClass" data-id="'+k+'">'+escapeHtml(c.label)+' · '+escapeHtml(c.level)+'<span class="n">'+n+'人</span></button>';
+  });
+  nav.innerHTML = html;
+
+  const vb = document.getElementById('viewBar');
+  const c = cls();
+  vb.innerHTML = '';
+  [['plan','教学计划','内容与作业'],['seat','座位安排','拖拽排座'],['hw','作业登记','按章节记录']].forEach(function(v){
+    const on = S.ui.view === v[0] ? 'on' : '';
+    vb.innerHTML += '<button class="view-tab '+on+'" data-act="switchView" data-view="'+v[0]+'">'+v[1]+'<small>'+v[2]+'</small></button>';
+  });
+  saveAndFlash();
+}
+
+/* =========================================================
+   座位视图
+   ========================================================= */
+function renderSeat(){
+  const c = cls();
+  const seat = c.seat;
+  const pool = poolOf(c);
+  const students = teachingVisibleStudents(c);
+  const seated = students.length - pool.length;
+  const sel = S._sel; // {stuId, from: seatKey|null}
+
+  let poolHtml = '<div class="pool-col">';
+  poolHtml += '<div class="pool-title">学生池 <span>未入座 '+pool.length+' 人 · 已入座 '+seated+' 人</span></div>';
+  poolHtml += '<div class="pool-sub">点选学生后点目标座位，可移动或互换；也可拖动座位</div>';
+  poolHtml += '<div class="add-row"><input id="addName" placeholder="姓名（可带班级，如：张三 IG1.2）" maxlength="40"><button id="addStu">添加</button></div>';
+  if(pool.length===0){
+    const emptyTip = students.length ? '全部学生都已入座' : '尚无学生。可在上方添加学生，或导入旧工作台备份。';
+    poolHtml += '<div class="empty-tip">'+emptyTip+'</div>';
+  } else {
+    poolHtml += '<div class="pool-list" id="poolList">';
+    pool.forEach(function(st){
+      const clsSel = (sel && sel.stuId===st.id) ? ' sel' : '';
+      const cc = classColor(st.tag);
+      const tagHtml = st.tag? '<span class="tag"'+(cc?(' style="background:'+cc.bg+';color:'+cc.tx+';border:1px solid '+cc.bd+'"'):'')+'>'+escapeHtml(st.tag)+'</span>' : '';
+      poolHtml += '<div class="chip pool-chip '+clsSel+'" draggable="true" data-id="'+st.id+'" data-src="">'+avatar(st.name)+'<span class="nm">'+escapeHtml(st.name)+'</span>'+tagHtml+scoreBadge(st)
+        +'<span class="rm" data-del="'+st.id+'" title="移出本班名单">✕</span></div>';
+    });
+    poolHtml += '</div>';
+  }
+  poolHtml += '<div class="pool-tools">';
+  poolHtml += '<button data-act="autoFill">按名单顺序排座（仅填空位）</button>';
+  poolHtml += '<button data-act="clearSeats">清空全部座位</button>';
+  poolHtml += '<button data-act="printSeat">打印当前座位表</button>';
+  poolHtml += '</div>';
+  poolHtml += '<div class="pool-hint">提示：拖动整个座位，或先点学生、再点目标座位；再次点选可取消。锁定后不可移动。</div>';
+  poolHtml += '</div>';
+
+  let stageHtml = '<div class="stage-col"><div class="stage-toolbar">';
+  stageHtml += '<div class="grp">行 <span class="num-ctl"><button data-act="rowMinus">−</button><b id="rowVal">'+seat.rows+'</b><button data-act="rowPlus">＋</button></span></div>';
+  stageHtml += '<div class="grp">列 <span class="num-ctl"><button data-act="colMinus">−</button><b id="colVal">'+seat.cols+'</b><button data-act="colPlus">＋</button></span></div>';
+  stageHtml += '<label class="chk"><input type="checkbox" id="lockSeat" '+(seat.locked?'checked':'')+' > 锁定座位（防误动）</label>';
+  stageHtml += '<button class="score-toggle'+(S.ui.scoreShown?' on':'')+'" data-act="toggleScore">'+(S.ui.scoreShown?'🔓 成绩显示中':'🔒 成绩已锁定')+'</button>';
+  stageHtml += '<span class="toolbar-note">座位颜色=行政班 · 分数分色（≥70绿 / 50-69橙 / &lt;50红）</span>';
+  stageHtml += '</div>';
+
+  stageHtml += '<div class="stage-body"><div class="lectern">讲 台</div><div class="seat-grid" id="seatGrid">';
+  for(let r=0;r<seat.rows;r++){
+    stageHtml += '<div class="seat-row" data-r="'+r+'">';
+    for(let col=0;col<seat.cols;col++){
+      const id = seat.grid[r][col];
+      const key = seatKey(r,col);
+      const st = seatOccupant(c,id);
+      if(st){
+        const nm = st? st.name : '?';
+        const cc = st? classColor(st.tag) : null;
+        const seatStyle = cc? ' style="border-color:'+cc.bd+';background:'+cc.bg+'"' : '';
+        const tg = (st && st.tag)? '<span class="seat-tag"'+(cc?(' style="color:'+cc.tx+'"'):'')+'>'+escapeHtml(st.tag)+'</span>' : '';
+        const scb = st? scoreBadge(st) : '';
+        const clsSel = (sel && sel.stuId===id)? ' sel' : '';
+        stageHtml += '<div class="seat '+clsSel+'" draggable="true" data-id="'+id+'" data-src="'+key+'" data-key="'+key+'" data-r="'+r+'" data-c="'+col+'"'+seatStyle+'>'
+          +'<span class="seat-num">'+(r+1)+'-'+(col+1)+'</span>'
+          +'<span class="seat-inner">'+avatar(nm)+'<span class="snm">'+escapeHtml(nm)+(scb?' '+scb:'')+'</span>'+tg+'</span>'
+          +'<span class="del" data-unseat="'+id+'" title="撤回学生池">✕</span>'
+          +'</div>';
+      } else {
+        stageHtml += '<div class="seat empty" data-key="'+key+'" data-r="'+r+'" data-c="'+col+'">'
+          +'<span class="seat-num">'+(r+1)+'-'+(col+1)+'</span><span class="empty-seat-dots"><i></i><i></i><i></i></span></div>';
+      }
+    }
+    stageHtml += '</div>';
+  }
+  stageHtml += '</div>';
+
+  /* 班级颜色图例 */
+  const seen = {};
+  students.forEach(function(st){ if(st.tag) seen[st.tag]=1; });
+  const tags = Object.keys(seen);
+  if(tags.length){
+    stageHtml += '<div class="cls-legend"><span class="lg-t">行政班</span>';
+    tags.forEach(function(t){
+      const cc = classColor(t);
+      stageHtml += '<span class="lg-chip"'+(cc?(' style="background:'+cc.bg+';color:'+cc.tx+';border:1px solid '+cc.bd+'"'):'')+'>'+escapeHtml(t)+'</span>';
+    });
+    stageHtml += '<span class="lg-note">'+(S.ui.scoreShown?'成绩已显示（点 🔒 按钮隐藏，投屏时请锁定）':'成绩已锁定（点 🔒 按钮显示）')+'</span></div>';
+  }
+  stageHtml += '</div>';
+
+  document.getElementById('main').innerHTML = '<div class="page-card"><div class="seat-wrap">' + poolHtml + stageHtml + '</div></div>';
+  bindSeat();
+}
+
+function findSeatOf(c, stuId){
+  for(let r=0;r<c.seat.rows;r++){
+    for(let col=0;col<c.seat.cols;col++){
+      if(c.seat.grid[r][col]===stuId) return {r:r, c:col};
+    }
+  }
+  return null;
+}
+
+function doMove(stuId, srcKey, tr, tc){
+  const c = cls();
+  const g = c.seat.grid;
+  const cur = findSeatOf(c, stuId);
+  // 重复点自己所在座位
+  if(cur && cur.r===tr && cur.c===tc) return;
+  const targetId = seatOccupant(c,g[tr][tc])?.id;
+  if(cur){
+    // 从座位移动
+    if(targetId){
+      // 互换
+      g[tr][tc] = stuId;
+      g[cur.r][cur.c] = targetId;
+    } else {
+      g[cur.r][cur.c] = '';
+      g[tr][tc] = stuId;
+    }
+  } else {
+    // 从学生池放入
+    if(targetId){
+      // 原座位者自然回池（grid 覆盖），无需额外处理
+    }
+    g[tr][tc] = stuId;
+  }
+}
+
+function bindSeat(){
+  const c = cls();
+  const seat = c.seat;
+  const main = document.getElementById('main');
+
+  /* 点击学生池学生 → 选中 */
+  document.getElementById('poolList') && document.getElementById('poolList').querySelectorAll('.chip').forEach(function(ch){
+    ch.addEventListener('click', function(ev){
+      if(seat.locked) return;
+      const id = ch.getAttribute('data-id');
+      if(ev.target.getAttribute('data-del') !== null) return; // 交给删除处理
+      S._sel = (S._sel && S._sel.stuId===id) ? null : { stuId:id, from:null };
+      renderSeat();
+    });
+  });
+
+  /* 池内删除学生（名单管理） */
+  main.querySelectorAll('[data-del]').forEach(function(el){
+    el.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      const id = el.getAttribute('data-del');
+      const st = c.students.find(function(x){return x.id===id;});
+      if(!st) return;
+      if(!confirm('确定把「'+st.name+'」从本班名单移除？\n其座位与作业记录会一并删除。' )) return;
+      removeStudent(id);
+      showToast('已移除 ' + st.name);
+      renderAll();
+    });
+  });
+
+  /* 拖动：座位格里的学生（data-src 非空 = 座位来源） */
+  main.querySelectorAll('[draggable="true"]').forEach(function(d){
+    d.addEventListener('dragstart', function(ev){
+      if(seat.locked){ ev.preventDefault(); return; }
+      const id = d.getAttribute('data-id');
+      const src = d.getAttribute('data-src') || null;
+      ev.dataTransfer.setData('text/plain', id);
+      ev.dataTransfer.setData('text/src', src||'');
+      d.classList.add('dragging');
+      S._sel = null;
+    });
+    d.addEventListener('dragend', function(){ d.classList.remove('dragging'); });
+  });
+
+  /* 座位目标 */
+  main.querySelectorAll('.seat').forEach(function(cell){
+    cell.addEventListener('dragover', function(ev){
+      if(seat.locked) return;
+      ev.preventDefault();
+      cell.classList.add('dropover');
+    });
+    cell.addEventListener('dragleave', function(){ cell.classList.remove('dropover'); });
+    cell.addEventListener('drop', function(ev){
+      ev.preventDefault();
+      cell.classList.remove('dropover');
+      if(seat.locked) return;
+      const id = ev.dataTransfer.getData('text/plain');
+      const src = ev.dataTransfer.getData('text/src') || '';
+      const r = +cell.getAttribute('data-r'), col = +cell.getAttribute('data-c');
+      doMove(id, src||null, r, col);
+      renderSeat();
+      saveAndFlash();
+    });
+    /* 点击座位 */
+    cell.addEventListener('click', function(ev){
+      if(seat.locked) return;
+      if(ev.target.getAttribute('data-unseat')!==null) return;
+      const r = +cell.getAttribute('data-r'), col = +cell.getAttribute('data-c');
+      const id = seat.grid[r][col];
+      if(!S._sel){
+        if(id){ S._sel = {stuId:id, from:seatKey(r,col)}; renderSeat(); }
+        return;
+      }
+      if(S._sel.stuId===id){ S._sel=null; renderSeat(); return; }
+      doMove(S._sel.stuId, S._sel.from, r, col);
+      S._sel = null;
+      renderSeat();
+      saveAndFlash();
+    });
+    /* 点座位上的撤座 */
+    const un = cell.querySelector('[data-unseat]');
+    if(un) un.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      const id = un.getAttribute('data-unseat');
+      const pos = findSeatOf(c, id);
+      if(pos){ c.seat.grid[pos.r][pos.c]=''; }
+      S._sel = null;
+      renderSeat();
+      saveAndFlash();
+    });
+  });
+
+  /* 学生池作为拖放目标（把学生拖回池） */
+  const poolWrap = document.querySelector('.pool-col');
+  if(poolWrap){
+    poolWrap.addEventListener('dragover', function(ev){
+      if(seat.locked) return;
+      if(Array.from(ev.dataTransfer.types || []).includes('text/plain')){ ev.preventDefault(); poolWrap.classList.add('over'); }
+    });
+    poolWrap.addEventListener('dragleave', function(){ poolWrap.classList.remove('over'); });
+    poolWrap.addEventListener('drop', function(ev){
+      ev.preventDefault();
+      poolWrap.classList.remove('over');
+      if(seat.locked) return;
+      const id = ev.dataTransfer.getData('text/plain');
+      const pos = findSeatOf(c, id);
+      if(pos){ c.seat.grid[pos.r][pos.c]=''; }
+      S._sel = null;
+      renderSeat();
+      saveAndFlash();
+    });
+  }
+}
+
+function removeStudent(id){
+  const c = cls();
+  const pos = findSeatOf(c, id);
+  if(pos) c.seat.grid[pos.r][pos.c] = '';
+  c.students = c.students.filter(function(x){ return x.id!==id; });
+  // 清作业
+  Object.keys(c.hw.marks).forEach(function(key){delete c.hw.marks[key][id];});
+  Object.keys(c.chapterHW.marks).forEach(function(key){delete c.chapterHW.marks[key][id];});
+}
+
+function addStudent(name){
+  name = (name||'').trim();
+  if(!name) return;
+  let stuName = name, tag = '';
+  const sp = name.split(/[\s　]+/);
+  if(sp.length>=2){
+    stuName = sp[0];
+    tag = sp.slice(1).join('');
+  }
+  const c = cls();
+  const st = { id: uid(c, stuName), name: stuName, tag: tag, note:'' };
+  c.students.push(st);
+}
+
+/* =========================================================
+   作业登记视图
+   ========================================================= */
+/* 章节作业：独立保存，旧版按天记录继续保留在 hw 中。 */
+function normalizeChapterHW(c){
+  if(!c.chapterHW) c.chapterHW = {chapters:[], marks:{}, seq:0};
+  const hw = c.chapterHW;
+  hw.chapters = Array.isArray(hw.chapters) ? hw.chapters : [];
+  hw.marks = hw.marks || {};
+  hw.seq = Number(hw.seq) || 0;
+  hw.chapters.forEach(function(ch){ if(!hw.marks[ch.id]) hw.marks[ch.id] = {}; });
+}
+function addChapter(c, label){
+  label = String(label || '').trim().slice(0,80);
+  if(!label) return null;
+  const hw = c.chapterHW;
+  let id;
+  do { id = c.id + '_chapter_' + (++hw.seq); } while(hw.chapters.some(function(ch){ return ch.id===id; }));
+  const chapter = {id:id, label:label};
+  hw.chapters.push(chapter);
+  hw.marks[id] = {};
+  return chapter;
+}
+function setChapterGrade(c, chapterId, studentId, grade){
+  if(!['A','B','C',''].includes(grade)) throw new Error('无效等级');
+  if(!c.chapterHW.chapters.some(function(ch){ return ch.id===chapterId; }) ||
+     !c.students.some(function(st){ return st.id===studentId; })) throw new Error('章节或学生不存在');
+  if(grade) c.chapterHW.marks[chapterId][studentId] = grade;
+  else delete c.chapterHW.marks[chapterId][studentId];
+}
+function closeGradePicker(restoreFocus){
+  const pop = document.getElementById('menuPop');
+  if(!pop) return;
+  const source = pop._source;
+  pop.style.display='none'; pop.innerHTML=''; pop._source=null;
+  if(source) source.setAttribute('aria-expanded','false');
+  if(restoreFocus && source && source.isConnected) source.focus();
+}
+function openGradePicker(button){
+  closeGradePicker();
+  const c = cls();
+  const chId = button.dataset.chapter, sid = button.dataset.student;
+  const ch = c.chapterHW.chapters.find(function(x){return x.id===chId;});
+  const student = c.students.find(function(x){return x.id===sid;});
+  const value = c.chapterHW.marks[chId][sid] || '';
+  const pop = document.getElementById('menuPop');
+  pop.className='menu-pop chapter-picker';
+  pop.setAttribute('role','dialog');
+  pop.setAttribute('aria-label',student.name+'的作业等级');
+  pop.innerHTML='<div class="grade-context">'+escapeHtml(student.name)+' <span>· '+escapeHtml(ch.label)+'</span></div>'
+    +'<div class="grade-options">'+['A','B','C'].map(function(g){
+      return '<button type="button" class="grade-option grade-'+g+'" data-grade="'+g+'" aria-pressed="'+(value===g)+'">'+g+'</button>';
+    }).join('')+'</div><button type="button" class="grade-clear" data-grade="">清空</button>';
+  pop._source=button;
+  button.setAttribute('aria-expanded','true');
+  pop.style.display='block';
+  const rect=button.getBoundingClientRect();
+  pop.style.left=Math.max(8,Math.min(rect.left+(rect.width-248)/2,window.innerWidth-256))+'px';
+  pop.style.top=Math.max(8,Math.min(rect.bottom+6,window.innerHeight-pop.offsetHeight-8))+'px';
+  pop.querySelectorAll('[data-grade]').forEach(function(option){
+    option.addEventListener('click',function(){
+      const grade=option.dataset.grade;
+      setChapterGrade(c,chId,sid,grade);
+      button.className='grade-cell'+(grade?' grade-'+grade:'');
+      button.textContent=grade || '—';
+      button.setAttribute('aria-label',student.name+'，'+ch.label+'，'+(grade||'未登记')+'，选择等级');
+      closeGradePicker(true); saveAndFlash();
+    });
+  });
+  pop.querySelector('[data-grade="'+value+'"]').focus();
+}
+function renameChapter(chapterId){
+  const c=cls(), ch=c.chapterHW.chapters.find(function(x){return x.id===chapterId;});
+  if(!ch) return;
+  const box=document.getElementById('dialogBox'), mask=document.getElementById('mask');
+  box.innerHTML='<h3>修改章节 / 作业名称</h3><form id="renameChapterForm"><input class="chapter-input" id="renameChapterInput" maxlength="80" required aria-label="章节名称" value="'+escapeHtml(ch.label)+'"><div class="chapter-dialog-actions"><button type="button" id="cancelChapterRename">取消</button><button type="submit" class="chapter-primary">保存</button></div></form>';
+  mask.classList.add('show');
+  const input=document.getElementById('renameChapterInput'); input.focus(); input.select();
+  document.getElementById('cancelChapterRename').onclick=function(){mask.classList.remove('show');};
+  document.getElementById('renameChapterForm').onsubmit=function(e){
+    e.preventDefault(); const value=input.value.trim();
+    if(!value){input.focus();return;}
+    ch.label=value; mask.classList.remove('show');renderHW();saveAndFlash();
+  };
+}
+/* 仅对显示副本分组，不修改学生数组、编号、登记记录或座位。 */
+function groupedHomeworkStudents(c){
+  return teachingVisibleStudents(c).map(function(st,index){return {student:st,index:index};})
+    .sort(function(a,b){
+      const at=String(a.student.tag||'').trim(), bt=String(b.student.tag||'').trim();
+      if(at===bt) return a.index-b.index;
+      if(!at) return 1;
+      if(!bt) return -1;
+      return at.localeCompare(bt,'zh-CN',{numeric:true}) || a.index-b.index;
+    }).map(function(entry){return entry.student;});
+}
+function homeworkNameColor(st){
+  const tag=String(st.tag||'').trim();
+  const colors={IGB1:'#235a9c',IGB2:'#0a7a47',IGB3:'#946c00'};
+  const existing=classColor(tag);
+  return colors[tag] || (existing?existing.tx:'#34445e');
+}
+
+function renderHW(){
+  closeGradePicker();
+  const c=cls(), hw=c.chapterHW;
+  let html='<div class="chapter-page"><div class="chapter-heading"><div><h2>章节作业</h2><p>自定义章节或作业名称 · 点击格子选择 A / B / C</p></div>'
+    +'<form id="addChapterForm" class="chapter-add"><input class="chapter-input" id="chapterName" aria-label="新章节或作业名称" placeholder="如：第一章 · 有理数加法" maxlength="80" required><button type="submit" class="chapter-primary">＋ 添加章节</button></form></div>';
+  if(!hw.chapters.length){
+    html+='<div class="chapter-empty"><div class="chapter-empty-symbol">A <span>B</span> C</div><h3>从第一份章节作业开始</h3><p>在上方填写章节或作业名称，添加后即可逐人登记等级。</p></div>';
+  }else{
+    html+='<div class="chapter-table-scroll"><table class="chapter-table"><thead><tr><th scope="col" class="chapter-student-head">学生 <span> / '+teachingVisibleStudents(c).length+' 人</span></th>';
+    hw.chapters.forEach(function(ch){
+      html+='<th scope="col"><button type="button" class="chapter-title" data-rename-chapter="'+escapeHtml(ch.id)+'" title="点击修改名称">'+escapeHtml(ch.label)+'<span aria-hidden="true"> ✎</span></button></th>';
+    });
+    html+='</tr></thead><tbody>';
+    let previousTag=null;
+    groupedHomeworkStudents(c).forEach(function(st){
+      const tag=String(st.tag||'').trim();
+      const groupStart=previousTag!==null && previousTag!==tag;
+      previousTag=tag;
+      html+='<tr'+(groupStart?' class="admin-group-start"':'')+'><th scope="row"><div class="chapter-student"><div><b style="color:'+homeworkNameColor(st)+'">'+escapeHtml(st.name)+'</b><small style="color:'+homeworkNameColor(st)+'">'+escapeHtml(st.tag)+'</small></div></div></th>';
+      hw.chapters.forEach(function(ch){
+        const grade=hw.marks[ch.id][st.id]||'';
+        html+='<td><button type="button" class="grade-cell'+(grade?' grade-'+grade:'')+'" data-chapter="'+escapeHtml(ch.id)+'" data-student="'+escapeHtml(st.id)+'" aria-haspopup="dialog" aria-expanded="false" aria-label="'+escapeHtml(st.name+'，'+ch.label+'，'+(grade||'未登记')+'，选择等级')+'">'+(grade||'—')+'</button></td>';
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table></div><div class="chapter-footer"><span>'+hw.chapters.length+' 项章节作业 · 点击表头可修改名称</span><button type="button" data-act="exportCSV">导出本班表格</button></div>';
+  }
+  html+='</div>';
+  document.getElementById('main').innerHTML=html;
+  document.getElementById('addChapterForm').onsubmit=function(e){
+    e.preventDefault(); const input=document.getElementById('chapterName');
+    const ch=addChapter(c,input.value);
+    if(!ch){input.focus();return;}
+    renderHW();saveAndFlash();
+    const scroll=document.querySelector('.chapter-table-scroll');
+    if(scroll) scroll.scrollLeft=scroll.scrollWidth;
+    document.getElementById('chapterName').focus();
+  };
+  document.querySelectorAll('[data-rename-chapter]').forEach(function(button){button.onclick=function(){renameChapter(button.dataset.renameChapter);};});
+  document.querySelectorAll('.grade-cell').forEach(function(button){button.onclick=function(){openGradePicker(button);};});
+  const scroll=document.querySelector('.chapter-table-scroll');
+  if(scroll) scroll.addEventListener('scroll',function(){closeGradePicker();});
+}
+
+
+/* =========================================================
+   打印 / 备份 / 帮助
+   ========================================================= */
+function printSeat(){
+  const c = cls();
+  const seat = c.seat;
+  let tbl = '<table style="border-collapse:collapse;margin:0 auto;text-align:center;">';
+  seat.grid.forEach(function(row){
+    tbl += '<tr>';
+    row.forEach(function(id){
+      const st = seatOccupant(c,id);
+      if(st){
+        tbl += '<td style="border:1.5px solid #333;width:120px;height:64px;font-size:14px;">' + escapeHtml(st?st.name:'') + (st&&st.tag?'<br><span style="font-size:11px;color:#666">'+escapeHtml(st.tag)+'</span>':'') + '</td>';
+      } else {
+        tbl += '<td style="width:120px;height:64px;border:1px dashed #999;color:#999;font-size:11px;">空座</td>';
+      }
+    });
+    tbl += '</tr>';
+  });
+  tbl += '</table>';
+  const win = window.open('', '_blank');
+  if(!win){ showToast('浏览器拦截了打印窗口，请允许弹窗'); return; }
+  const now = new Date();
+  win.document.write('<html><head><meta charset="utf-8"><title>座位表 '+escapeHtml(c.label)+'</title><style>body{font-family:"Microsoft YaHei";padding:30px;}h2{text-align:center;}p{text-align:center;color:#444;margin:4px 0 18px;}</style></head><body>'
+    +'<h2>'+escapeHtml(c.label)+' · 数学走班座位表</h2>'
+    +'<p>'+escapeHtml(c.level)+'　·　打印时间 '+now.toLocaleDateString('zh-CN')+'</p>'
+    +'<p style="width:340px;margin:0 auto 24px;border:1.5px solid #333;border-radius:8px;padding:6px;letter-spacing:10px;">讲　台</p>'
+    + tbl
+    +'<p style="margin-top:24px;color:#777;font-size:12px;">合计 '+teachingVisibleStudents(c).length+' 人 · 空座 '+((seat.rows*seat.cols)-teachingVisibleStudents(c).length+poolOf(c).length)+' 位</p>'
+    +'</body></html>');
+  win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); }, 300);
+}
+
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(S,null,1)], {type:'application/json'});
+  const a = document.createElement('a');
+  const d = new Date();
+  const ds = d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+  a.href = URL.createObjectURL(blob);
+  a.download = '数学走班工作台备份_'+ds+'.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 200);
+  showToast('备份已导出');
+}
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      const data = prepareTeachingBackup(JSON.parse(reader.result), S.ui.view);
+      const hasRecords = Object.values(S.classes).some(c=>c.students.length||c.chapterHW.chapters.length)
+        || S.plan.weeks.length>1 || S.plan.history?.length
+        || S.plan.weeks.some(week=>week.days.some(day=>Object.values(day.homework).some(Boolean)||day.lessons.length));
+      if (hasRecords && !confirm('导入备份将替换教学计划、座位和作业记录。继续导入？')) return;
+      try { localStorage.setItem(LS_KEY,JSON.stringify(data)); }
+      catch(e){ throw new Error('浏览器无法保存，请检查本地存储空间'); }
+      S = data;
+      storeOK = true;
+      renderAll();
+      showToast('备份导入成功');
+    }catch(e){
+      alert('无法导入备份：' + e.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportCSV(){
+  const c=cls(), hw=c.chapterHW;
+  const rows=[['学生','行政班'].concat(hw.chapters.map(function(ch){return ch.label;}))];
+  teachingVisibleStudents(c).forEach(function(st){rows.push([st.name,st.tag||''].concat(hw.chapters.map(function(ch){return hw.marks[ch.id][st.id]||'';})));});
+  const csv=rows.map(function(row){return row.map(function(v){v=String(v);if(/^[=+@-]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=c.label+'_章节作业.csv';
+  document.body.appendChild(a);a.click();setTimeout(function(){a.remove();URL.revokeObjectURL(a.href);},200);
+  showToast('已导出 '+c.label+' 章节作业');
+}
+
+function showHelp(){
+  const box=document.getElementById('dialogBox');
+  box.innerHTML='<h3>使用说明</h3><div class="sect"><h4>教学计划</h4><p>总览按周一至周日展示每天的节次，上午五节、下午四节。点击空节次可排课，已排课程可编辑教学内容、备注或调课。</p><p>点 IG1、IGB 或 IG3 查看本班每天的课程，填写当天的作业。作业随日期和班级保存，调课和复制课程不会移动当天作业。</p><p>旧课表可在“待安排的旧计划”核对、补选班级和节次。需要更改时可撤销。新建一周可沿用课表、复制完整计划或创建空白周。</p></div><div class="sect"><h4>座位安排</h4><p>点选学生后点击座位，或直接拖动入座、互换。拖回学生池可撤座；锁定后可防误动。各班独立保存。</p></div><div class="sect"><h4>章节作业</h4><p>输入自定义章节或作业名称，点击“添加章节”。点击表头可修改名称。</p><p>点击学生对应的格子，选择 A、B、C；选“清空”恢复未登记。所有操作自动保存。</p></div><div class="sect"><h4>数据备份</h4><p>顶栏可导出、导入教学工作台完整备份。旧版按天记录保留在备份的 hw 数据中，新章节等级独立保存，不自动换算。</p></div><button id="closeHelp" class="chapter-primary">知道了</button>';
+  document.getElementById('mask').classList.add('show');
+  document.getElementById('closeHelp').onclick=function(){document.getElementById('mask').classList.remove('show');};
+}
+
+/* =========================================================
+   入口 & 全局事件
+   ========================================================= */
+function renderAll(){
+  closeGradePicker();
+  S.ui.active = S.ui.active || Object.keys(S.classes)[0];
+  renderTop();
+  if(S.ui.view==='plan') renderPlan();
+  else if(S.ui.view==='hw') renderHW();
+  else renderSeat();
+}
+
+function sendTeachingMessage(message){
+  if (embeddedTeaching) window.parent.postMessage(message, location.protocol==='file:' ? '*' : location.origin);
+}
+
+function selectTeachingView(view, notifyParent){
+  if (!TEACHING_VIEWS.has(view)) return;
+  if (S.ui.view !== view) closePlanDialog();
+  S._paint = null;
+  S.ui.view = view;
+  renderAll();
+  if (notifyParent) sendTeachingMessage({type:'math-teaching:route',view});
+}
+
+window.addEventListener('message', event=>{
+  const expectedOrigin = location.protocol==='file:' ? 'null' : location.origin;
+  if (!embeddedTeaching || event.source!==window.parent || event.origin!==expectedOrigin || !backupRecord(event.data)) return;
+  const {type,view,roster} = event.data;
+  if (type==='math-teaching:set-view' && TEACHING_VIEWS.has(view)) {
+    if (backupRecord(roster)) workbenchRoster = roster;
+    syncTeachingRoster(roster);
+    selectTeachingView(view,false);
+  } else if (type==='math-teaching:sync-roster' && backupRecord(roster)) {
+    workbenchRoster = roster;
+    const result = syncTeachingRoster(roster,true);
+    renderAll();
+    sendTeachingMessage({type:'math-teaching:roster-synced',...result});
+  }
+});
+
+document.addEventListener('click', function(ev){
+  const t = ev.target.closest('[data-act]');
+  if(!t) return;
+  const act = t.getAttribute('data-act');
+  if(act==='switchClass'){ S.ui.active = t.getAttribute('data-id'); S._sel=null; renderAll(); }
+  else if(act==='switchView') selectTeachingView(t.getAttribute('data-view'),true);
+  else if(act==='autoFill'){
+    const c = cls();
+    const pool = poolOf(c);
+    let p = 0;
+    for(let r=0;r<c.seat.rows;r++){
+      for(let col=0;col<c.seat.cols;col++){
+        if(!seatOccupant(c,c.seat.grid[r][col]) && p<pool.length){ c.seat.grid[r][col]=pool[p++].id; }
+      }
+    }
+    renderSeat(); saveAndFlash(); showToast('已按名单顺序占位，可继续拖拽调整');
+  }
+  else if(act==='clearSeats'){
+    if(confirm('清空当前班级全部座位（学生回到学生池）？')){
+      const c = cls();
+      c.seat.grid.forEach(function(row){ row.forEach(function(id,i){ if(seatOccupant(c,id)) row[i]=''; }); });
+      S._sel = null;
+      renderSeat(); saveAndFlash();
+    }
+  }
+  else if(act==='printSeat'){ printSeat(); }
+  else if(act==='rowPlus'||act==='rowMinus'||act==='colPlus'||act==='colMinus'){
+    const c = cls();
+    let dr=0, dc=0;
+    if(act==='rowPlus') dr=1; else if(act==='rowMinus') dr=-1;
+    if(act==='colPlus') dc=1; else if(act==='colMinus') dc=-1;
+    resizeGrid(c, c.seat.rows+dr, c.seat.cols+dc);
+    renderSeat(); saveAndFlash();
+  }
+  else if(act==='toggleScore'){
+    S.ui.scoreShown = !S.ui.scoreShown;
+    renderAll(); saveLS();
+    showToast(S.ui.scoreShown? '成绩已显示——投屏时注意隐私' : '成绩已锁定隐藏');
+  }
+  else if(act==='exportCSV'){ exportCSV(); }
+  else if(act==='hwBackToSeat') selectTeachingView('seat',true);
+});
+
+/* 行/列增减 */
+function resizeGrid(c, rows, cols){
+  rows = Math.max(1, Math.min(12, rows));
+  cols = Math.max(1, Math.min(12, cols));
+  const ng = [];
+  for(let r=0;r<rows;r++){
+    const row=[];
+    for(let col=0;col<cols;col++){
+      const v = (c.seat.grid[r] && c.seat.grid[r][col]!==undefined) ? c.seat.grid[r][col] : '';
+      row.push(v);
+    }
+    ng.push(row);
+  }
+  c.seat.rows = rows; c.seat.cols = cols; c.seat.grid = ng;
+}
+
+/* 顶栏动作绑定 */
+document.getElementById('btnExport').addEventListener('click', exportJSON);
+document.getElementById('btnImport').addEventListener('click', function(){ document.getElementById('fileImport').click(); });
+document.getElementById('fileImport').addEventListener('change', function(){
+  if(this.files && this.files[0]) importJSON(this.files[0]);
+  this.value='';
+});
+document.getElementById('btnHelp').addEventListener('click', showHelp);
+
+/* main 事件委托：座位页添加学生 */
+document.getElementById('main').addEventListener('keydown', function(ev){
+  if(ev.key==='Enter' && ev.target && ev.target.id==='addName'){
+    const btn = document.getElementById('addStu');
+    if(btn) btn.click();
+  }
+});
+document.getElementById('main').addEventListener('click', function(ev){
+  const t = ev.target;
+  if(t && t.id==='addStu'){
+    const inp = document.getElementById('addName');
+    const name = inp? inp.value : '';
+    if(name.trim()){ addStudent(name); renderSeat(); saveAndFlash(); showToast('已添加 ' + name.trim().split(/[\s　]+/)[0]); }
+  }
+});
+/* main 事件委托：锁定座位开关（checkbox change） */
+document.getElementById('main').addEventListener('change', function(ev){
+  if(ev.target && ev.target.id==='lockSeat'){
+    const c = cls();
+    c.seat.locked = ev.target.checked;
+    S._sel = null;
+    renderSeat();
+    saveAndFlash();
+    showToast(c.seat.locked? '座位已锁定，解锁后可继续调整':'座位已解锁');
+  }
+});
+/* main 事件委托：作业页行内 ✕ 移除名单 */
+document.getElementById('main').addEventListener('click', function(ev){
+  const t = ev.target.closest('[data-delstu]');
+  if(!t) return;
+  const c = cls();
+  const id = t.getAttribute('data-delstu');
+  const st = c.students.find(function(x){ return x.id===id; });
+  if(!st) return;
+  if(confirm('确定把「'+st.name+'」从本班名单移除？其座位与作业记录一并删除。')){
+    removeStudent(id);
+    renderAll();
+    showToast('已移除 ' + st.name);
+  }
+});
+
+/* 遮罩点击关闭帮助 */
+document.getElementById('mask').addEventListener('click', function(ev){
+  if(ev.target && ev.target.id==='mask'){if(document.getElementById('dialogBox').dataset.planDialog)closePlanDialog();else this.classList.remove('show');}
+});
+
+/* 章节等级：点击外部、滚动窗口或 Escape 关闭选择器。 */
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#menuPop') && !e.target.closest('.grade-cell')) closeGradePicker();
+});
+window.addEventListener('resize',function(){closeGradePicker();});
+window.addEventListener('scroll',function(){closeGradePicker();});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape') return;
+  closeGradePicker(true);
+  document.getElementById('mask').classList.remove('show');
+  if(S._sel){S._sel=null;if(S.ui.view==='seat')renderSeat();}
+});
+
+document.addEventListener('keydown',function(e){
+  const box=document.getElementById('dialogBox'),mask=document.getElementById('mask');
+  if(!box.dataset.planDialog)return;
+  if(e.key==='Escape'){closePlanDialog();return;}
+  if(e.key!=='Tab'||!mask.classList.contains('show'))return;
+  const items=Array.from(box.querySelectorAll('button:not(:disabled),input,textarea,select')).filter(el=>el.getClientRects().length);
+  if(!items.length)return;
+  const first=items[0],last=items[items.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+});
+/* 启动 */
+renderAll();
+saveAndFlash();
+</script>
+</body>
+</html>

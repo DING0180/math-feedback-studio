@@ -38,12 +38,14 @@ function pfDraftActions() {
 function pfDraftGenerate(record, part, examId, style) {
   if (part==='daily') return {text:pfWriteDaily(record,style)};
   if (part==='action') return {text:pfWriteActions(record,style)};
-  const evidence = examId ? pfExamFeedback(record,examId,style) : null;
+  const reviewed = examId && pfExamLinks(record).find(link=>link.exam.id===examId)?.person.examAnalysis;
+  const evidence = reviewed ? {text:reviewed, summary:'已载入核对两次考试答题卡后的本次分析。'} :
+    examId ? pfExamFeedback(record,examId,style) : null;
   const note = pfExamQualitativeNotes(record.examNote).join('。');
   const manual = note ? note+'。' : '';
   let extra = manual;
   if (!evidence?.text && extra && record.name && !extra.includes(record.name)) extra = `复看${record.name}的答卷时发现，${extra}`;
-  return {...evidence, text:[evidence?.text,extra].filter(Boolean).join('')};
+  return {...evidence, text:[evidence?.text,extra].filter(Boolean).join(reviewed?'\n':'')};
 }
 function pfDraftBind() {
   const record = pfStudent();

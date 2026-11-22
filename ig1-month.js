@@ -49,5 +49,11 @@ uProfile = function (student) {
 const ig1OldExamPanel=uExamPanel;uExamPanel=function(s,e,i){if(e.importTag==='ig1-harvey-2026'&&s.group!=='IG1')return '';return ig1OldExamPanel(s,e,i)};
 render();
 /* 工作台统计补充 IG1、IG3 的原始总分记录，不重复计算对应逐题档案。 */
-const ig1PriorDashboard=views.dashboard;views.dashboard=function(){let html=ig1PriorDashboard(),base=db.students.reduce((n,s)=>n+(s.exams||[]).length+(s.comparisonRecords||[]).reduce((a,r)=>a+r.scores.filter(v=>v!==null).length,0),0),extra=db.students.reduce((n,s)=>n+(s.group==='IG1'?(caScores(s)?.scores||[]):[]).filter(v=>v!==null).length+(s.ig3AliceTotals?.scores||[]).filter(v=>v!==null).length,0);return html.replace(`<span>考试记录</span><strong>${base}</strong>`,`<span>考试记录</span><strong>${base+extra}</strong>`)};
+const ig1PriorDashboard=views.dashboard;
+views.dashboard=function(){
+  const html=ig1PriorDashboard(), roster=activeStudentRoster();
+  const base=roster.reduce((n,s)=>n+s.exams.length+(s.comparisonRecords||[]).reduce((a,r)=>a+r.scores.filter(v=>v!==null).length,0),0);
+  const extra=roster.reduce((n,s)=>n+(s.group==='IG1'?(caScores(s)?.scores||[]):[]).filter(v=>v!==null).length+(s.ig3AliceTotals?.scores||[]).filter(v=>v!==null).length,0);
+  return html.replace(`<span>考试记录</span><strong>${base}</strong>`,`<span>考试记录</span><strong>${base+extra}</strong>`);
+};
 render();

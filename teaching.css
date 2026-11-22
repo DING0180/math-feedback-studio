@@ -1,0 +1,57 @@
+.teaching-module[hidden] {
+  display: none;
+}
+
+.teaching-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.teaching-tools p {
+  margin: 0 auto 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.teaching-frame {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: max(680px, calc(100dvh - 205px));
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 0 5px 20px #1b48340a;
+}
+
+@media (min-width: 901px) {
+  .sidebar #nav {
+    overflow-y: auto;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff38 transparent;
+  }
+
+  .sidebar .brand,
+  .sidebar .sidefoot {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .teaching-tools {
+    justify-content: flex-start;
+  }
+
+  .teaching-tools p {
+    flex-basis: 100%;
+  }
+
+  .teaching-frame {
+    height: max(560px, calc(100dvh - 170px));
+  }
+}
